@@ -767,13 +767,23 @@
   </div>
 </div>
 
-<!-- FULL REPORT PAGE (authenticated) -->
+<!-- FULL REPORT PAGE (authenticated + demo) -->
 <div id="pageReport" class="page">
   <div class="report-page">
     <div style="font-size:13px; color:var(--text-hint); margin-bottom:16px; display:flex; gap:16px;">
       <a href="#" onclick="showPage('landing')" style="color:var(--brand);">← Home</a>
-      <a href="#" onclick="showPage('dashboard')" style="color:var(--brand);">Dashboard</a>
+      <a href="#" onclick="showPage('dashboard')" style="color:var(--brand);" id="reportDashLink">Dashboard</a>
     </div>
+
+    <!-- Demo banner -->
+    <div id="reportDemoBanner" style="display:none; background:var(--accent-light); border:1px solid var(--accent); border-radius:12px; padding:14px 18px; margin-bottom:24px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+      <div>
+        <div style="font-size:13px; font-weight:700; color:#92400e;">This is a demo report</div>
+        <div style="font-size:12px; color:#92400e; opacity:0.8;">Generated from a sample bill. Sign up to audit your real utility bills.</div>
+      </div>
+      <button class="btn btn-primary" onclick="showModal('signup')" style="flex-shrink:0; white-space:nowrap;">Get started free →</button>
+    </div>
+
     <div class="report-title" id="reportTitle">Full Audit Report</div>
     <div class="report-sub" id="reportSub"></div>
 
@@ -803,7 +813,47 @@
       <div id="reportRecommendations"></div>
     </div>
 
-    <button class="btn btn-accent btn-lg" style="margin-top:8px;" onclick="showToast('Dispute letter generated and ready to download')">Generate dispute letter →</button>
+    <!-- DISPUTE LETTER GENERATOR -->
+    <div class="report-section" id="disputeLetterSection">
+      <h3>Dispute letter</h3>
+      <div style="background:var(--surface-2); border-radius:14px; border:1px solid var(--border); padding:24px;">
+        <p style="font-size:14px; color:var(--text-muted); margin-bottom:20px;">Generate a formal dispute letter addressed to your utility's billing department. Cite the specific findings and request a rate correction and credit.</p>
+
+        <!-- Logo upload -->
+        <div style="margin-bottom:18px;">
+          <label style="margin-top:0;">Company logo (optional)</label>
+          <div id="logoUploadArea" onclick="document.getElementById('logoInput').click()" style="border:2px dashed var(--border-strong); border-radius:10px; padding:16px 20px; cursor:pointer; display:flex; align-items:center; gap:14px; transition:all 0.2s; background:var(--surface);" onmouseover="this.style.borderColor='var(--brand-mid)'" onmouseout="this.style.borderColor='var(--border-strong)'">
+            <div id="logoPreview" style="width:60px; height:40px; background:var(--surface-3); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--text-hint); flex-shrink:0;">Logo</div>
+            <div>
+              <div style="font-size:14px; font-weight:500;">Upload your company logo</div>
+              <div style="font-size:12px; color:var(--text-hint);">PNG, JPG — appears in the letter header. Optional.</div>
+            </div>
+          </div>
+          <input type="file" id="logoInput" accept=".png,.jpg,.jpeg" style="display:none" onchange="previewLogo(this)">
+        </div>
+
+        <!-- Sender info -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;">
+          <div>
+            <label>Your name / title</label>
+            <input type="text" id="senderName" placeholder="Jane Smith, CFO" />
+          </div>
+          <div>
+            <label>Your email</label>
+            <input type="text" id="senderEmail" placeholder="jane@company.com" />
+          </div>
+          <div style="grid-column:1/-1;">
+            <label>Your mailing address</label>
+            <input type="text" id="senderAddress" placeholder="123 Main St, City, State 12345" />
+          </div>
+        </div>
+
+        <button class="btn btn-accent btn-lg" onclick="generateDisputeLetter()" id="generateLetterBtn" style="width:100%;">
+          Generate dispute letter PDF →
+        </button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1479,7 +1529,11 @@ async function startAudit() {
   pendingAuditData = { org, facility, state, utility, utilityId, auditResult };
 
   await new Promise(r => setTimeout(r, 600));
-  showResultsPage(auditResult, org, facility, state, utility);
+  if (isDemoMode) {
+    showFullReport(auditResult, org, facility, state, utility);
+  } else {
+    showResultsPage(auditResult, org, facility, state, utility);
+  }
   resetAuditUI();
 }
 
@@ -1772,16 +1826,32 @@ async function loadAndViewReport(auditId) {
 }
 
 
+// Store current report data for dispute letter generation
+let currentReportData = {};
+
 function showFullReport(result, org, facility, state, utility) {
-  document.getElementById('reportTitle').textContent = 'Full Audit — ' + org;
+  // Store for dispute letter
+  currentReportData = { result, org, facility, state, utility };
+
+  // Show/hide demo banner
+  const demoBanner = document.getElementById('reportDemoBanner');
+  const dashLink = document.getElementById('reportDashLink');
+  if (isDemoMode) {
+    demoBanner.style.display = 'flex';
+    dashLink.style.display = 'none';
+  } else {
+    demoBanner.style.display = 'none';
+    dashLink.style.display = 'inline';
+  }
+
+  document.getElementById('reportTitle').textContent = (isDemoMode ? 'Demo Report — ' : 'Full Audit — ') + org;
   document.getElementById('reportSub').textContent = `${facility} · ${state} · ${utility} · Billed by ${result.utility_provider}`;
   document.getElementById('reportSavings').textContent = '$' + (result.annual_savings_estimate||0).toLocaleString();
   document.getElementById('reportSavingsPeriod').textContent = 'per year · $' + Math.round((result.annual_savings_estimate||0)/12).toLocaleString() + '/month';
 
   // Bill summary
-  const bs = result.bill_summary || {};
   document.getElementById('reportBillSummary').innerHTML = `
-    <div style="background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);overflow:hidden;">
+    <div style="background:var(--surface);border-radius:12px;border:1px solid var(--border);overflow:hidden;">
       ${[['Billing period', result.billing_period],['Provider',result.utility_provider],['Account',result.account_number||'—'],['Current rate',result.current_rate_schedule],['Recommended rate',result.recommended_rate_schedule||'(no change needed)'],['Total bill','$'+(result.total_bill_amount||0).toLocaleString()]].map(([l,v])=>`<div class="detail-row"><div class="detail-label">${l}</div><div class="detail-value">${v}</div></div>`).join('')}
     </div>`;
 
@@ -1798,10 +1868,234 @@ function showFullReport(result, org, facility, state, utility) {
   document.getElementById('reportRecommendations').innerHTML = (result.recommendations||[]).map(r=>`
     <div class="recommendation-card"><p>${r}</p></div>`).join('');
 
+  // Pre-fill dispute letter org name
+  if (org) document.getElementById('senderAddress') && (document.getElementById('senderAddress').placeholder = `${org}, Your Address`);
+
   showPage('report');
 }
 
-// ── AUTH ──────────────────────────────────────────────────────
+// ── DISPUTE LETTER ────────────────────────────────────────────
+let logoDataUrl = null;
+
+function previewLogo(input) {
+  if (!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    logoDataUrl = e.target.result;
+    const preview = document.getElementById('logoPreview');
+    preview.innerHTML = `<img src="${logoDataUrl}" style="max-width:60px; max-height:40px; object-fit:contain;">`;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+async function generateDisputeLetter() {
+  const btn = document.getElementById('generateLetterBtn');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+
+  const { result, org, facility, state, utility } = currentReportData;
+  const senderName = document.getElementById('senderName').value || org;
+  const senderEmail = document.getElementById('senderEmail').value || '';
+  const senderAddress = document.getElementById('senderAddress').value || '';
+  const today = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  const isDemo = isDemoMode;
+
+  try {
+    // Generate letter content via Claude
+    let letterContent = await generateLetterContent(result, org, facility, state, utility, senderName, senderEmail, senderAddress, today);
+
+    // Render to PDF via canvas
+    await renderLetterToPDF(letterContent, org, senderName, senderEmail, senderAddress, today, isDemo);
+
+    btn.disabled = false;
+    btn.textContent = 'Generate dispute letter PDF →';
+    showToast('Dispute letter downloaded!');
+  } catch(e) {
+    console.error('Letter generation error:', e);
+    // Fallback to template letter
+    const fallback = buildTemplateLetterContent(result, org, facility, state, utility, senderName, senderEmail, senderAddress, today);
+    await renderLetterToPDF(fallback, org, senderName, senderEmail, senderAddress, today, isDemo);
+    btn.disabled = false;
+    btn.textContent = 'Generate dispute letter PDF →';
+    showToast('Dispute letter downloaded!');
+  }
+}
+
+async function generateLetterContent(result, org, facility, state, utility, senderName, senderEmail, senderAddress, today) {
+  const findingsSummary = (result.findings||[]).map(f =>
+    `- ${f.title}: $${f.monthly_savings}/month overcharge. ${f.description} Action: ${f.action_required}`
+  ).join('\n');
+
+  const prompt = `Write a formal utility billing dispute letter on behalf of ${org}, a ${facility} in ${state}.
+
+The letter is addressed to: ${result.utility_provider} Billing Department
+
+Account number: ${result.account_number || 'On file'}
+Current rate schedule: ${result.current_rate_schedule}
+Billing period in dispute: ${result.billing_period}
+
+FINDINGS TO DISPUTE:
+${findingsSummary}
+
+Total estimated annual overcharge: $${result.annual_savings_estimate}
+
+Write a professional, firm dispute letter that:
+1. States the purpose clearly in the opening
+2. Cites each billing error with specific amounts
+3. References relevant tariff schedules where applicable  
+4. Requests a formal billing review and retroactive credit
+5. Sets a 30-day response deadline
+6. Is polite but firm
+
+Format as plain paragraphs with clear section breaks. No markdown. Start directly with "Re:" subject line.`;
+
+  const res = await fetch('/api/audit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!res.ok) throw new Error('API error');
+  const data = await res.json();
+  return data.content.map(b => b.text || '').join('');
+}
+
+function buildTemplateLetterContent(result, org, facility, state, utility, senderName, senderEmail, senderAddress, today) {
+  const findings = (result.findings||[]).map(f =>
+    `${f.title}\n${f.description}\nEstimated monthly overcharge: $${f.monthly_savings}\nRequested action: ${f.action_required}`
+  ).join('\n\n');
+
+  return `Re: Formal Billing Dispute — Account ${result.account_number || 'On File'}
+
+To the Billing Department,
+
+I am writing on behalf of ${org}, a ${facility} located in ${state}, to formally dispute charges on our utility account with ${result.utility_provider}.
+
+After a thorough review of our billing statements, we have identified the following discrepancies totaling an estimated $${Math.round((result.annual_savings_estimate||0)/12).toLocaleString()} per month ($${(result.annual_savings_estimate||0).toLocaleString()} annually):
+
+${findings}
+
+We respectfully request that ${result.utility_provider} conduct a formal review of our account and issue the appropriate credits for any confirmed overcharges, applied retroactively to the extent permitted under applicable tariff provisions and state regulations.
+
+Please respond within 30 days of receipt of this letter. If we do not receive a response within that timeframe, we will escalate this matter to the ${state} Public Utilities Commission.
+
+Thank you for your prompt attention to this matter.
+
+Sincerely,
+
+${senderName}
+${org}
+${senderAddress}
+${senderEmail}`;
+}
+
+async function renderLetterToPDF(content, org, senderName, senderEmail, senderAddress, today, isDemo) {
+  const canvas = document.createElement('canvas');
+  const scale = 2; // retina
+  canvas.width = 816 * scale;
+  canvas.height = 1056 * scale;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+
+  const w = 816, h = 1056;
+  const margin = 72; // 1 inch
+
+  // White background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, w, h);
+
+  // Demo watermark
+  if (isDemo) {
+    ctx.save();
+    ctx.translate(w/2, h/2);
+    ctx.rotate(-Math.PI/4);
+    ctx.font = 'bold 64px Arial';
+    ctx.fillStyle = 'rgba(200,0,0,0.06)';
+    ctx.textAlign = 'center';
+    ctx.fillText('SAMPLE DEMO', 0, 0);
+    ctx.restore();
+  }
+
+  let y = margin;
+
+  // Logo
+  if (logoDataUrl) {
+    try {
+      const img = new Image();
+      await new Promise(r => { img.onload = r; img.src = logoDataUrl; });
+      const maxH = 60, maxW = 160;
+      const ratio = Math.min(maxW/img.width, maxH/img.height);
+      ctx.drawImage(img, margin, y, img.width*ratio, img.height*ratio);
+      y += Math.max(img.height*ratio, 20) + 20;
+    } catch(e) {}
+  }
+
+  // Header info
+  ctx.font = '12px Arial';
+  ctx.fillStyle = '#333';
+  ctx.textAlign = 'left';
+  if (senderName) { ctx.fillText(senderName, margin, y); y += 16; }
+  if (org) { ctx.fillText(org, margin, y); y += 16; }
+  if (senderAddress) { ctx.fillText(senderAddress, margin, y); y += 16; }
+  if (senderEmail) { ctx.fillText(senderEmail, margin, y); y += 16; }
+  y += 8;
+  ctx.fillText(today, margin, y); y += 24;
+
+  // Addressee
+  ctx.fillText(`${currentReportData.result?.utility_provider || 'Utility'} Billing Department`, margin, y); y += 16;
+  ctx.fillText('Billing Disputes Division', margin, y); y += 32;
+
+  // Letter body
+  ctx.font = '12px Arial';
+  ctx.fillStyle = '#222';
+  const lines = content.split('\n');
+  const lineHeight = 18;
+  const maxWidth = w - margin * 2;
+
+  for (const line of lines) {
+    if (!line.trim()) { y += lineHeight * 0.6; continue; }
+
+    // Word wrap
+    const words = line.split(' ');
+    let currentLine = '';
+    for (const word of words) {
+      const test = currentLine ? currentLine + ' ' + word : word;
+      if (ctx.measureText(test).width > maxWidth) {
+        ctx.fillText(currentLine, margin, y);
+        y += lineHeight;
+        currentLine = word;
+        if (y > h - margin * 2) break;
+      } else {
+        currentLine = test;
+      }
+    }
+    if (currentLine) {
+      ctx.fillText(currentLine, margin, y);
+      y += lineHeight;
+    }
+    if (y > h - margin * 2) break;
+  }
+
+  // GridAudit footer
+  y = h - margin + 10;
+  ctx.strokeStyle = '#e0e0e0';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(margin, y-10); ctx.lineTo(w-margin, y-10); ctx.stroke();
+  ctx.font = '10px Arial';
+  ctx.fillStyle = '#aaa';
+  ctx.textAlign = 'center';
+  ctx.fillText(`Generated by GridAudit — Utility Bill Intelligence Platform${isDemo ? ' · SAMPLE DEMO ONLY' : ''}`, w/2, y+4);
+
+  // Download
+  const link = document.createElement('a');
+  link.download = `dispute-letter-${org.replace(/\s+/g,'-').toLowerCase()}${isDemo?'-SAMPLE':''}.pdf`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+
 function showModal(mode) {
   authMode = mode;
   toggleAuthMode(mode);
