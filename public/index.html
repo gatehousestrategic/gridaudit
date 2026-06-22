@@ -1649,7 +1649,7 @@ function showFullReport(result, org, facility, state, utility) {
     <div class="savings-row">
       <div><strong>${f.title}</strong><br><span style="color:var(--text-muted);font-size:12px;">${f.description}</span></div>
       <div style="font-weight:600;color:var(--brand);">$${f.monthly_savings.toLocaleString()}/mo</div>
-      <div><span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--${f.confidence==='high'?'brand-light':'accent-light'});color:var(--${f.confidence==='high'?'brand-dark':'accent});">${f.confidence} confidence</span></div>
+      <div><span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${f.confidence==='high'?'var(--brand-light)':'var(--accent-light)'};color:${f.confidence==='high'?'var(--brand-dark)':'var(--accent)'};">${f.confidence} confidence</span></div>
     </div>`).join('') +
     `<div class="savings-row total"><div>Total annual savings</div><div>$${Math.round((result.annual_savings_estimate||0)/12).toLocaleString()}/mo</div><div>$${(result.annual_savings_estimate||0).toLocaleString()}/yr</div></div>`;
 
@@ -1986,13 +1986,6 @@ async function adminSetTier(userId, tier) {
 
 async function adminViewAudit(auditId) {
   await loadAndViewReport(auditId);
-}
-
-
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 // Close modal on bg click
