@@ -83,6 +83,32 @@ create policy "Users can insert own audits"
 create index audits_user_id_created_at on public.audits(user_id, created_at desc);
 
 
+-- ── LEADS ─────────────────────────────────────────────────────
+-- Captures free audit runs where user didn't sign up
+create table public.leads (
+  id uuid primary key default gen_random_uuid(),
+  org_name text not null,
+  facility_type text not null,
+  state text not null,
+  utility_type text not null,
+  savings_shown numeric,
+  findings_count integer,
+  created_at timestamptz not null default now()
+);
+
+-- Leads are insert-only from anonymous users (no RLS user check needed)
+alter table public.leads enable row level security;
+
+create policy "Anyone can insert leads"
+  on public.leads for insert
+  with check (true);
+
+-- Only authenticated users (admins) can read leads
+create policy "Authenticated users can read leads"
+  on public.leads for select
+  using (auth.role() = 'authenticated');
+
+
 -- ── STORAGE BUCKET ────────────────────────────────────────────
 -- Create a private bucket for uploaded bills
 insert into storage.buckets (id, name, public)

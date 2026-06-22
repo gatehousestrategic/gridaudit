@@ -64,27 +64,37 @@
   .stat-num { font-size: 28px; font-weight: 700; color: var(--brand-dark); }
   .stat-label { font-size: 12px; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.5px; }
 
-  /* UPLOAD ZONE */
-  .upload-section { max-width: 640px; margin: 0 auto; padding: 0 2rem 80px; }
+  /* UPLOAD CONTAINER */
+  .upload-section { max-width: 600px; margin: 0 auto; padding: 0 2rem 80px; }
   .upload-card { background: var(--surface); border-radius: var(--radius-lg); border: 0.5px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
-  .upload-header { padding: 24px 28px 0; }
-  .upload-header h2 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
-  .upload-header p { font-size: 14px; color: var(--text-muted); }
-  .upload-body { padding: 24px 28px 28px; }
-
-  .drop-zone { border: 1.5px dashed var(--border-strong); border-radius: var(--radius); padding: 40px 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--surface-2); }
-  .drop-zone:hover, .drop-zone.dragover { border-color: var(--brand-mid); background: var(--brand-light); }
-  .drop-icon { font-size: 36px; margin-bottom: 10px; color: var(--brand-mid); }
-  .drop-zone p { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
-  .drop-zone strong { color: var(--text); }
-  .file-types { font-size: 12px; color: var(--text-hint); margin-top: 4px; }
-
-  .form-group { margin-top: 18px; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 5px; }
+  .upload-body { padding: 20px 28px 28px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 5px; margin-top: 14px; }
   input, select { width: 100%; padding: 9px 12px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); font-size: 14px; background: var(--surface); color: var(--text); transition: border-color 0.15s; }
   input:focus, select:focus { outline: none; border-color: var(--brand-mid); }
   select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 30px; }
+
+  /* STEP PILLS */
+  .step-pill { display:flex; align-items:center; gap:8px; }
+  .step-pill-num { width:24px; height:24px; border-radius:50%; background:var(--surface-3); color:var(--text-hint); font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s; }
+  .step-pill-label { font-size:13px; color:var(--text-hint); font-weight:500; transition:color 0.2s; }
+  .step-pill.active .step-pill-num { background:var(--brand); color:white; }
+  .step-pill.active .step-pill-label { color:var(--text); }
+  .step-pill.done .step-pill-num { background:var(--brand-light); color:var(--brand); }
+  .step-connector { flex:1; height:1px; background:var(--border); margin:0 10px; }
+
+  /* UPLOAD ZONE V2 */
+  .drop-zone-v2 { border:1.5px dashed var(--border-strong); border-radius:var(--radius); padding:32px 24px; display:flex; align-items:center; gap:20px; cursor:pointer; transition:all 0.2s; background:var(--surface-2); }
+  .drop-zone-v2:hover, .drop-zone-v2.dragover { border-color:var(--brand-mid); background:var(--brand-light); }
+  .drop-zone-icon { flex-shrink:0; }
+  .drop-zone-text { flex:1; }
+  .drop-zone-main { font-size:15px; font-weight:600; color:var(--text); margin-bottom:4px; }
+  .drop-zone-sub { font-size:13px; color:var(--text-hint); }
+
+  /* UTILITY BUTTONS */
+  .util-btn { border:0.5px solid var(--border-strong); border-radius:var(--radius); padding:12px 8px; text-align:center; cursor:pointer; font-size:12px; font-weight:500; color:var(--text-muted); transition:all 0.15s; background:var(--surface); }
+  .util-btn:hover { border-color:var(--brand-mid); color:var(--brand); background:var(--brand-light); }
+  .util-btn.selected { border-color:var(--brand); border-width:1.5px; color:var(--brand-dark); background:var(--brand-light); }
+  .util-btn div:first-child { margin-bottom:6px; }
 
   .file-selected { display: none; align-items: center; gap: 10px; padding: 12px; background: var(--brand-light); border-radius: var(--radius); margin-top: 12px; }
   .file-selected.show { display: flex; }
@@ -188,7 +198,8 @@
   /* PRICING */
   .pricing-section { background: var(--surface-2); padding: 64px 2rem; border-top: 0.5px solid var(--border); }
   .pricing-inner { max-width: 860px; margin: 0 auto; }
-  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 680px; margin: 0 auto; }
+  @media (max-width: 640px) { .pricing-grid { grid-template-columns: 1fr; } }
   .price-card { background: var(--surface); border-radius: var(--radius-lg); border: 0.5px solid var(--border); padding: 28px; }
   .price-card.featured { border: 2px solid var(--brand-mid); }
   .price-tier { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-hint); margin-bottom: 8px; }
@@ -222,7 +233,21 @@
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: white; padding: 12px 20px; border-radius: var(--radius); font-size: 14px; z-index: 300; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
   .toast.show { transform: translateY(0); opacity: 1; }
 
-  @media (max-width: 600px) {
+  /* FAQ */
+  .faq-section { background: var(--surface); border-top: 0.5px solid var(--border); padding: 64px 2rem; }
+  .faq-inner { max-width: 720px; margin: 0 auto; }
+  .faq-group { margin-bottom: 40px; }
+  .faq-group-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-hint); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 0.5px solid var(--border); }
+  .faq-item { border-bottom: 0.5px solid var(--border); }
+  .faq-question { width: 100%; background: none; border: none; text-align: left; padding: 18px 0; font-size: 15px; font-weight: 500; color: var(--text); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  .faq-question:hover { color: var(--brand); }
+  .faq-chevron { font-size: 18px; color: var(--text-hint); flex-shrink: 0; transition: transform 0.25s; line-height: 1; }
+  .faq-item.open .faq-chevron { transform: rotate(45deg); }
+  .faq-answer { font-size: 14px; color: var(--text-muted); line-height: 1.75; max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; padding: 0; }
+  .faq-item.open .faq-answer { max-height: 400px; padding-bottom: 18px; }
+  .faq-answer strong { color: var(--text); font-weight: 500; }
+
+
     .form-row { grid-template-columns: 1fr; }
     .stats-bar { gap: 24px; }
     .audit-row { grid-template-columns: 1fr 1fr; }
@@ -234,6 +259,9 @@
 
 <nav>
   <div class="logo">Grid<span>Audit</span></div>
+  <div style="display:flex;gap:24px;align-items:center;">
+    <a href="#faq" style="font-size:14px;color:var(--text-muted);text-decoration:none;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--text-muted)'">FAQ</a>
+  </div>
   <div class="nav-actions" id="navActions">
     <button class="btn btn-ghost" onclick="showModal('login')">Log in</button>
     <button class="btn btn-primary" onclick="showModal('signup')">Get started free</button>
@@ -255,29 +283,65 @@
 
   <div class="upload-section">
     <div class="upload-card">
-      <div class="upload-header">
-        <h2>Upload a bill — first audit is free</h2>
-        <p>Electric, gas, water/sewer, oil, or propane. SNF, multifamily, manufacturing, and more.</p>
-      </div>
-      <div class="upload-body">
-        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-          <div class="drop-icon">📄</div>
-          <p><strong>Drop your utility bill here</strong></p>
-          <p>or click to browse</p>
-          <p class="file-types">PDF, JPG, PNG — up to 20MB</p>
+
+      <!-- Step indicators -->
+      <div style="display:flex; align-items:center; gap:0; padding:24px 28px 0;">
+        <div class="step-pill active" id="pill1">
+          <span class="step-pill-num">1</span>
+          <span class="step-pill-label">Upload bill</span>
         </div>
-        <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
-        <div class="file-selected" id="fileSelected">
-          <span>📎</span>
-          <span class="file-name" id="fileName"></span>
-          <button class="file-remove" onclick="clearFile()">×</button>
+        <div class="step-connector"></div>
+        <div class="step-pill" id="pill2">
+          <span class="step-pill-num">2</span>
+          <span class="step-pill-label">Your facility</span>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-pill" id="pill3">
+          <span class="step-pill-num">3</span>
+          <span class="step-pill-label">Run audit</span>
+        </div>
+      </div>
+
+      <div class="upload-body">
+
+        <!-- STEP 1: Upload -->
+        <div id="uploadStep1">
+          <div class="drop-zone-v2" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <div class="drop-zone-icon">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="6" y="2" width="20" height="26" rx="3" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1.5"/>
+                <path d="M11 10h10M11 14h10M11 18h7" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="24" cy="24" r="6" fill="#0F6E56"/>
+                <path d="M24 21v6M21 24h6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="drop-zone-text">
+              <div class="drop-zone-main">Drop your utility bill here</div>
+              <div class="drop-zone-sub">or click to browse &nbsp;·&nbsp; PDF, JPG, PNG up to 20MB</div>
+            </div>
+          </div>
+          <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+
+          <div class="file-selected" id="fileSelected">
+            <div style="width:36px;height:36px;background:var(--brand-light);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="1" width="12" height="16" rx="2" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1.2"/><path d="M6 6h6M6 9h6M6 12h4" stroke="#1D9E75" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+            <span class="file-name" id="fileName"></span>
+            <button class="file-remove" onclick="clearFile()">×</button>
+          </div>
+
+          <button class="btn btn-primary btn-lg" style="width:100%; margin-top:20px;" id="nextStepBtn" onclick="goToStep2()">
+            Continue →
+          </button>
+          <p style="font-size:12px; color:var(--text-hint); text-align:center; margin-top:10px;">No credit card required. First audit is free.</p>
         </div>
 
-        <div class="form-group">
-          <div class="form-row">
-            <div>
+        <!-- STEP 2: Facility info -->
+        <div id="uploadStep2" style="display:none;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div style="grid-column:1/-1;">
               <label>Organization name</label>
-              <input type="text" id="orgName" placeholder="Sunrise SNF" />
+              <input type="text" id="orgName" placeholder="Your organization name" />
             </div>
             <div>
               <label>Facility type</label>
@@ -292,8 +356,6 @@
                 <option value="other">Other</option>
               </select>
             </div>
-          </div>
-          <div class="form-row" style="margin-top: 14px;">
             <div>
               <label>State</label>
               <select id="stateSelect">
@@ -301,37 +363,53 @@
                 <option>Alabama</option><option>Alaska</option><option>Arizona</option><option>Arkansas</option><option>California</option><option>Colorado</option><option>Connecticut</option><option>Delaware</option><option>Florida</option><option>Georgia</option><option>Hawaii</option><option>Idaho</option><option>Illinois</option><option>Indiana</option><option>Iowa</option><option>Kansas</option><option>Kentucky</option><option>Louisiana</option><option>Maine</option><option>Maryland</option><option>Massachusetts</option><option>Michigan</option><option>Minnesota</option><option>Mississippi</option><option>Missouri</option><option>Montana</option><option>Nebraska</option><option>Nevada</option><option>New Hampshire</option><option>New Jersey</option><option>New Mexico</option><option>New York</option><option>North Carolina</option><option>North Dakota</option><option>Ohio</option><option>Oklahoma</option><option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option><option>South Carolina</option><option>South Dakota</option><option>Tennessee</option><option>Texas</option><option>Utah</option><option>Vermont</option><option>Virginia</option><option>Washington</option><option>West Virginia</option><option>Wisconsin</option><option>Wyoming</option>
               </select>
             </div>
-            <div>
+            <div style="grid-column:1/-1;">
               <label>Utility type</label>
-              <select id="utilityType">
-                <option value="">Select type...</option>
-                <option value="electric">Electric</option>
-                <option value="gas">Natural Gas</option>
-                <option value="water">Water / Sewer</option>
-                <option value="oil">Oil / Propane</option>
-              </select>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+                <div class="util-btn" onclick="selectUtil(this,'electric')">
+                  <div style="font-size:20px;">⚡</div>
+                  <div>Electric</div>
+                </div>
+                <div class="util-btn" onclick="selectUtil(this,'gas')">
+                  <div style="font-size:20px;">🔥</div>
+                  <div>Gas</div>
+                </div>
+                <div class="util-btn" onclick="selectUtil(this,'water')">
+                  <div style="font-size:20px;">💧</div>
+                  <div>Water / Sewer</div>
+                </div>
+                <div class="util-btn" onclick="selectUtil(this,'oil')">
+                  <div style="font-size:20px;">🛢️</div>
+                  <div>Oil / Propane</div>
+                </div>
+              </div>
+              <input type="hidden" id="utilityType" value="" />
             </div>
           </div>
+
+          <div class="progress-wrap" id="progressWrap">
+            <div class="progress-label">
+              <span id="progressLabel">Extracting bill data...</span>
+              <span id="progressPct">0%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+            <div class="progress-steps" id="progressSteps">
+              <div class="step-item" id="step1"><div class="step-dot">1</div>Extracting line items from bill</div>
+              <div class="step-item" id="step2"><div class="step-dot">2</div>Identifying utility & rate schedule</div>
+              <div class="step-item" id="step3"><div class="step-dot">3</div>Checking against state tariff database</div>
+              <div class="step-item" id="step4"><div class="step-dot">4</div>Calculating potential savings</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:20px;">
+            <button class="btn btn-ghost" onclick="goToStep1()" style="width:80px;">← Back</button>
+            <button class="btn btn-primary btn-lg" style="flex:1;" id="auditBtn" onclick="startAudit()">
+              Run free audit →
+            </button>
+          </div>
+          <p style="font-size:12px; color:var(--text-hint); text-align:center; margin-top:10px;">Takes about 60 seconds.</p>
         </div>
 
-        <div class="progress-wrap" id="progressWrap">
-          <div class="progress-label">
-            <span id="progressLabel">Extracting bill data...</span>
-            <span id="progressPct">0%</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-          <div class="progress-steps" id="progressSteps">
-            <div class="step-item" id="step1"><div class="step-dot">1</div>Extracting line items from bill</div>
-            <div class="step-item" id="step2"><div class="step-dot">2</div>Identifying utility & rate schedule</div>
-            <div class="step-item" id="step3"><div class="step-dot">3</div>Checking against state tariff database</div>
-            <div class="step-item" id="step4"><div class="step-dot">4</div>Calculating potential savings</div>
-          </div>
-        </div>
-
-        <button class="btn btn-primary btn-lg" style="width:100%; margin-top:20px;" id="auditBtn" onclick="startAudit()">
-          Run free audit →
-        </button>
-        <p style="font-size:12px; color:var(--text-hint); text-align:center; margin-top:10px;">No credit card required. Takes about 60 seconds.</p>
       </div>
     </div>
   </div>
@@ -380,12 +458,12 @@
     <div class="pricing-inner">
       <div class="section-label" style="text-align:center;">Pricing</div>
       <div class="section-title" style="text-align:center; margin-bottom:12px;">Simple membership. Keep the savings.</div>
-      <p style="text-align:center; color:var(--text-muted); font-size:15px; margin-bottom:40px;">No percentage of recovery. You keep everything.</p>
+      <p style="text-align:center; color:var(--text-muted); font-size:15px; margin-bottom:40px;">No percentage of recovery. No contingency fees. You keep every dollar we find — and our members recover an average of <strong>$4,200/year</strong> per facility.</p>
       <div class="pricing-grid">
         <div class="price-card">
           <div class="price-tier">Starter</div>
           <div class="price-amount">Free</div>
-          <div class="price-desc">First audit on us. See your savings potential before committing.</div>
+          <div class="price-desc">First audit on us. See exactly how much you're overpaying before you commit to anything.</div>
           <ul class="price-features">
             <li>1 bill audit</li>
             <li>Savings estimate report</li>
@@ -396,8 +474,8 @@
         </div>
         <div class="price-card">
           <div class="price-tier">Basic</div>
-          <div class="price-amount">$99<span class="price-period">/mo</span></div>
-          <div class="price-desc">For single-facility operators who audit regularly.</div>
+          <div class="price-amount">$150<span class="price-period">/mo</span></div>
+          <div class="price-desc">Most single-facility members recover $300–$800/month in overcharges. The membership pays for itself many times over.</div>
           <ul class="price-features">
             <li>2 audits per month</li>
             <li>Full itemized reports</li>
@@ -410,7 +488,7 @@
           <div class="popular-badge">Most popular</div>
           <div class="price-tier">Professional</div>
           <div class="price-amount">$299<span class="price-period">/mo</span></div>
-          <div class="price-desc">For operators managing multiple facilities.</div>
+          <div class="price-desc">For operators managing multiple facilities. One recovered overcharge typically covers the entire year.</div>
           <ul class="price-features">
             <li>10 audits per month</li>
             <li>Full itemized reports</li>
@@ -423,7 +501,7 @@
         <div class="price-card">
           <div class="price-tier">Enterprise</div>
           <div class="price-amount">Custom</div>
-          <div class="price-desc">For large portfolios and auditing firms. Let's talk.</div>
+          <div class="price-desc">For large portfolios and auditing firms. Let's build a plan around your volume.</div>
           <ul class="price-features">
             <li>Custom audit volume</li>
             <li>White-label reports</li>
@@ -435,9 +513,145 @@
       </div>
     </div>
   </div>
-</div>
 
-<!-- TEASER RESULTS PAGE -->
+  <!-- FAQ -->
+  <div class="faq-section" id="faq">
+    <div class="faq-inner">
+      <div class="section-label" style="text-align:center;">FAQ</div>
+      <div class="section-title" style="text-align:center; margin-bottom:40px;">Questions we get a lot</div>
+
+      <div class="faq-group">
+        <div class="faq-group-title">How it works</div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            How does GridAudit audit my bill?
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-answer">You upload a utility bill — PDF, JPG, or PNG. Our AI reads every line item, identifies your utility provider and current rate schedule, then cross-references it against the published tariff schedules for your state. We flag anything that doesn't match: wrong rate class, incorrect demand calculations, taxes you shouldn't be paying, math errors, and more. The whole process takes under 60 seconds.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            How long does an audit take?
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-answer">Most audits complete in 30–60 seconds. Occasionally a complex bill with many line items or an unusual rate structure takes up to 2 minutes. Either way, it's faster than anything a human auditor could do — and just as thorough.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            What types of utility bills can you audit?
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-answer">We audit <strong>electric, natural gas, water/sewer, oil, and propane</strong> bills. We work with commercial and institutional accounts — skilled nursing facilities, assisted living, multifamily residential, manufacturing plants, commercial buildings, and retail. We do not currently audit residential consumer accounts.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Which states do you cover?
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-answer">All 50 states. Utility tariff rules vary significantly by state and even by individual utility within a state. Our system accounts for these differences — a healthcare facility in New York faces different rate classifications than one in Texas, and we handle both.</div>
+        </div>
+      </div>
+
+      <div class="faq-group">
+        <div class="faq-group-title">The savings</div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            How much can I actually save?
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-answer">It depends on your facility size, utility type, and what errors are present. Our members recover an average of <strong>$4,200 per year per facility</strong>. SNFs and multifamily buildings with demand charges tend to see the largest recoveries — often $300–$800 per month. Even a modest finding on a single bill can more than cover a year of membership fees.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            How far back can overcharges be recovered?
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-answer">In most states, utilities are required to issue credits or refunds going back <strong>12 to 36 months</strong> when billing errors are identified and disputed. The retroactive window varies by state and utility. Our full audit reports specify exactly how far back a claim can reach, and our dispute letters are written to maximize the recovery period.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            What's the most common error you find?
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-answer"><strong>Rate misclassification</strong> — being billed under the wrong tariff schedule for your facility type. It's the single most common and most costly error. Utilities assign rate schedules when an account is first opened and rarely revisit them, even as a facility's usage profile changes or new, more favorable rates become available. Healthcare facilities are especially susceptible because many states offer specific rate classes for medical facilities that utilities don't proactively apply.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Do I have to negotiate with my utility myself?
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-answer">We make it as easy as possible. Your full audit report includes a ready-to-send <strong>dispute letter</strong> addressed to your utility's billing department. It cites the specific tariff provisions, identifies the errors, and formally requests a review and credit. Most customers send it by certified mail or email — no negotiation required. If a utility pushes back, we can help you escalate through your state's public utilities commission.</div>
+        </div>
+      </div>
+
+      <div class="faq-group">
+        <div class="faq-group-title">Pricing & membership</div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Why pay a membership fee instead of a percentage of recovery?
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-answer">Traditional utility auditors charge <strong>20–40% of whatever they recover</strong> — on a $5,000 annual finding, that's $1,000–$2,000 going to the auditor, every year. With GridAudit, you pay a flat monthly fee and keep every dollar you recover. For most facilities, a single finding pays for multiple years of membership. We think that's a much better deal — and AI makes it possible.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            What happens when I hit my monthly audit limit?
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-answer">Your audit counter resets at the start of each billing month. If you need more audits before then, you can upgrade your plan at any time and the new limit takes effect immediately. For large one-time needs — like auditing an entire portfolio at once — contact us and we'll work something out.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Can I cancel anytime?
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-answer">Yes. No contracts, no cancellation fees. Cancel from your account dashboard at any time and your access continues through the end of the billing period. Your audit history and reports remain accessible for 90 days after cancellation.</div>
+        </div>
+      </div>
+
+      <div class="faq-group">
+        <div class="faq-group-title">Trust & security</div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Is my bill data secure?
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-answer">Yes. Bill files are transmitted over encrypted connections and stored in a private, access-controlled storage bucket. Only your account can access your bills and audit results. We do not sell or share your data with third parties, and we do not use your bill data to train AI models.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            What facilities do you work with?
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-answer">We specialize in commercial and institutional accounts with complex rate structures: <strong>skilled nursing facilities (SNFs), assisted living communities, multifamily apartment buildings, manufacturing plants, warehouses, commercial offices, and retail</strong>. These facility types tend to have the most errors and the highest savings potential. We do not audit residential consumer accounts.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            What if the audit finds nothing?
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-answer">It happens — roughly 6% of audits come back clean. If your free audit finds no issues, we'll tell you that clearly. You won't be pressured to sign up. If you're a paying member and a bill comes back clean, that audit still counts against your monthly total, but it's also a good sign: it means your utility is billing you correctly for that period.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
 <div id="pageResults" class="page">
   <div class="results-page">
     <div class="results-header">
@@ -585,6 +799,35 @@
   </div>
 </div>
 
+<!-- ADMIN PAGE -->
+<div id="pageAdmin" class="page">
+  <div class="dashboard">
+    <div class="dash-header">
+      <div>
+        <div class="dash-welcome">Admin dashboard</div>
+        <div class="dash-sub">GridAudit internal</div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost" onclick="adminLoadTab('users')" id="adminTabUsers">Users</button>
+        <button class="btn btn-ghost" onclick="adminLoadTab('audits')" id="adminTabAudits">Audits</button>
+        <button class="btn btn-ghost" onclick="adminLoadTab('leads')" id="adminTabLeads">Leads</button>
+        <button class="btn btn-ghost" onclick="showPage('dashboard')">← Back</button>
+      </div>
+    </div>
+
+    <div class="dash-stats" id="adminStats">
+      <div class="stat-card"><div class="stat-card-label">Total users</div><div class="stat-card-value" id="adminStatUsers">—</div></div>
+      <div class="stat-card"><div class="stat-card-label">Total audits</div><div class="stat-card-value" id="adminStatAudits">—</div></div>
+      <div class="stat-card"><div class="stat-card-label">Total savings found</div><div class="stat-card-value" id="adminStatSavings">—</div></div>
+      <div class="stat-card"><div class="stat-card-label">Paid accounts</div><div class="stat-card-value" id="adminStatPaid">—</div></div>
+    </div>
+
+    <div class="audits-table" id="adminTable">
+      <div class="empty-audits">Select a tab above to load data</div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -600,18 +843,47 @@ let currentUser = null;
 let pendingAuditData = null;
 let authMode = 'signup';
 
-try {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-} catch(e) {
-  console.warn('Supabase not configured yet');
+// Init Supabase — works as long as URL and key are non-empty
+if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+  try {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } catch(e) {
+    console.error('Supabase init failed:', e);
+  }
+} else {
+  console.warn('Supabase not configured — auth will not work until env vars are set on the server');
 }
 
 // ── PAGES ─────────────────────────────────────────────────────
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const map = { landing:'pageLanding', results:'pageResults', dashboard:'pageDashboard', report:'pageReport' };
+  const map = { landing:'pageLanding', results:'pageResults', dashboard:'pageDashboard', report:'pageReport', admin:'pageAdmin' };
   document.getElementById(map[name]).classList.add('active');
   window.scrollTo(0,0);
+}
+
+// ── STEP NAVIGATION ───────────────────────────────────────────
+function goToStep2() {
+  if (!selectedFile) { showToast('Please upload a utility bill first'); return; }
+  document.getElementById('uploadStep1').style.display = 'none';
+  document.getElementById('uploadStep2').style.display = 'block';
+  document.getElementById('pill1').classList.remove('active');
+  document.getElementById('pill1').classList.add('done');
+  document.getElementById('pill2').classList.add('active');
+}
+
+function goToStep1() {
+  document.getElementById('uploadStep2').style.display = 'none';
+  document.getElementById('uploadStep1').style.display = 'block';
+  document.getElementById('pill2').classList.remove('active');
+  document.getElementById('pill1').classList.remove('done');
+  document.getElementById('pill1').classList.add('active');
+}
+
+function selectUtil(el, value) {
+  document.querySelectorAll('.util-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('utilityType').value = value;
 }
 
 // ── FILE HANDLING ─────────────────────────────────────────────
@@ -652,6 +924,10 @@ async function startAudit() {
   const btn = document.getElementById('auditBtn');
   btn.disabled = true;
   btn.textContent = 'Analyzing...';
+
+  document.getElementById('pill2').classList.remove('active');
+  document.getElementById('pill2').classList.add('done');
+  document.getElementById('pill3').classList.add('active');
 
   const progressWrap = document.getElementById('progressWrap');
   progressWrap.classList.add('show');
@@ -839,48 +1115,94 @@ function showResultsPage(result, org, facility, state, utility) {
   });
 
   showPage('results');
+
+  // Capture lead — anonymous user saw savings estimate but hasn't signed up
+  if (supabase) {
+    supabase.from('leads').insert({
+      org_name: org,
+      facility_type: facility,
+      state,
+      utility_type: utility,
+      savings_shown: result.annual_savings_estimate || 0,
+      findings_count: (result.findings || []).length
+    }).then(({ error }) => { if (error) console.warn('Lead capture failed:', error); });
+  }
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────
-function showDashboard(user) {
+async function showDashboard(user) {
   currentUser = user;
   const email = user.email || '';
   const name = user.user_metadata?.org_name || email.split('@')[0];
   document.getElementById('dashWelcome').textContent = 'Welcome, ' + name;
 
-  // Load audits from localStorage (demo) or Supabase
-  const saved = JSON.parse(localStorage.getItem('ga_audits') || '[]');
-
-  document.getElementById('statAudits').textContent = saved.length;
-  const totalSavings = saved.reduce((s,a) => s + (a.annual || 0), 0);
-  document.getElementById('statSavings').textContent = '$' + totalSavings.toLocaleString();
-  const totalIssues = saved.reduce((s,a) => s + (a.issues || 0), 0);
-  document.getElementById('statIssues').textContent = totalIssues;
-
-  const list = document.getElementById('auditsList');
-  if (saved.length === 0) {
-    list.innerHTML = '<div class="empty-audits">No audits yet. <a href="#" onclick="showPage(\'landing\')" style="color:var(--brand);">Run your first free audit →</a></div>';
-  } else {
-    list.innerHTML = saved.map(a => `
-      <div class="audit-row" onclick="viewSavedReport(${JSON.stringify(a).replace(/"/g,'&quot;')})" style="cursor:pointer;">
-        <div>
-          <div class="audit-facility">${a.org}</div>
-          <div class="audit-meta">${a.facility} · ${a.utility}</div>
-        </div>
-        <div class="audit-val">${a.utility}</div>
-        <div class="audit-val audit-col-hide">${a.state}</div>
-        <div class="audit-savings">$${(a.annual||0).toLocaleString()}/yr</div>
-        <div><span class="status-badge status-complete">Complete</span></div>
-      </div>`).join('');
-  }
-
   updateNav(true);
   showPage('dashboard');
+
+  // Load audits from Supabase
+  const list = document.getElementById('auditsList');
+  list.innerHTML = '<div class="empty-audits">Loading audits...</div>';
+
+  try {
+    const { data: audits, error } = await supabase
+      .from('audits')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const total = audits.length;
+    const totalSavings = audits.reduce((s,a) => s + (a.annual_savings_estimate || 0), 0);
+    const totalIssues = audits.reduce((s,a) => s + ((a.findings||[]).length || 0), 0);
+
+    document.getElementById('statAudits').textContent = total;
+    document.getElementById('statSavings').textContent = '$' + Math.round(totalSavings).toLocaleString();
+    document.getElementById('statIssues').textContent = totalIssues;
+
+    if (audits.length === 0) {
+      list.innerHTML = '<div class="empty-audits">No audits yet. <a href="#" onclick="showPage(\'landing\')" style="color:var(--brand);">Run your first free audit →</a></div>';
+    } else {
+      list.innerHTML = audits.map(a => `
+        <div class="audit-row" onclick="loadAndViewReport('${a.id}')" style="cursor:pointer;">
+          <div>
+            <div class="audit-facility">${a.org_name}</div>
+            <div class="audit-meta">${a.facility_type} · ${a.utility_type}</div>
+          </div>
+          <div class="audit-val">${a.utility_type}</div>
+          <div class="audit-val audit-col-hide">${a.state}</div>
+          <div class="audit-savings">$${Math.round(a.annual_savings_estimate||0).toLocaleString()}/yr</div>
+          <div><span class="status-badge status-complete">Complete</span></div>
+        </div>`).join('');
+    }
+  } catch(e) {
+    console.error('Error loading audits:', e);
+    list.innerHTML = '<div class="empty-audits">Error loading audits. Please refresh.</div>';
+  }
 }
 
-function viewSavedReport(audit) {
-  showFullReport(audit.result, audit.org, audit.facility, audit.state, audit.utility);
+async function loadAndViewReport(auditId) {
+  const { data, error } = await supabase
+    .from('audits')
+    .select('*')
+    .eq('id', auditId)
+    .single();
+  if (error || !data) { showToast('Could not load report'); return; }
+  const result = {
+    utility_provider: data.utility_provider,
+    account_number: data.account_number,
+    billing_period: data.billing_period,
+    current_rate_schedule: data.current_rate_schedule,
+    recommended_rate_schedule: data.recommended_rate_schedule,
+    total_bill_amount: data.total_bill_amount,
+    annual_savings_estimate: data.annual_savings_estimate,
+    findings: data.findings || [],
+    bill_summary: data.bill_summary || {},
+    recommendations: data.recommendations || []
+  };
+  showFullReport(result, data.org_name, data.facility_type, data.state, data.utility_type);
 }
+
 
 function showFullReport(result, org, facility, state, utility) {
   document.getElementById('reportTitle').textContent = 'Full Audit — ' + org;
@@ -943,38 +1265,14 @@ async function handleAuth() {
   errEl.classList.remove('show');
   if (!email || !password) { showAuthError('Please fill in all fields'); return; }
 
+  if (!supabase) {
+    showAuthError('Authentication is not configured yet. Please check server environment variables.');
+    return;
+  }
+
   const btn = document.getElementById('authSubmit');
   btn.disabled = true;
   btn.textContent = 'Working...';
-
-  // Demo mode if Supabase not configured
-  if (!supabase || SUPABASE_URL === 'YOUR_SUPABASE_URL') {
-    await new Promise(r => setTimeout(r, 800));
-    closeModal();
-    const demoUser = { email, user_metadata: { org_name: name || email.split('@')[0] } };
-
-    if (pendingAuditData) {
-      // Save audit to localStorage
-      const audits = JSON.parse(localStorage.getItem('ga_audits') || '[]');
-      audits.push({
-        id: Date.now(),
-        org: pendingAuditData.org,
-        facility: pendingAuditData.facility,
-        state: pendingAuditData.state,
-        utility: pendingAuditData.utility,
-        annual: pendingAuditData.auditResult.annual_savings_estimate,
-        issues: pendingAuditData.auditResult.findings.length,
-        result: pendingAuditData.auditResult
-      });
-      localStorage.setItem('ga_audits', JSON.stringify(audits));
-      showFullReport(pendingAuditData.auditResult, pendingAuditData.org, pendingAuditData.facility, pendingAuditData.state, pendingAuditData.utility);
-      pendingAuditData = null;
-    } else {
-      showDashboard(demoUser);
-    }
-    btn.disabled = false;
-    return;
-  }
 
   try {
     let result;
@@ -983,19 +1281,58 @@ async function handleAuth() {
     } else {
       result = await supabase.auth.signInWithPassword({ email, password });
     }
-    if (result.error) { showAuthError(result.error.message); btn.disabled = false; btn.textContent = authMode === 'signup' ? 'Create account →' : 'Log in →'; return; }
+
+    if (result.error) {
+      showAuthError(result.error.message);
+      btn.disabled = false;
+      btn.textContent = authMode === 'signup' ? 'Create account →' : 'Log in →';
+      return;
+    }
+
     closeModal();
     const user = result.data.user;
+
     if (pendingAuditData) {
-      showFullReport(pendingAuditData.auditResult, pendingAuditData.org, pendingAuditData.facility, pendingAuditData.state, pendingAuditData.utility);
+      await saveAuditToSupabase(user.id, pendingAuditData);
+      showFullReport(
+        pendingAuditData.auditResult,
+        pendingAuditData.org,
+        pendingAuditData.facility,
+        pendingAuditData.state,
+        pendingAuditData.utility
+      );
       pendingAuditData = null;
     } else {
-      showDashboard(user);
+      await showDashboard(user);
     }
   } catch(e) {
+    console.error('Auth error:', e);
     showAuthError('Something went wrong. Please try again.');
   }
   btn.disabled = false;
+}
+
+async function saveAuditToSupabase(userId, auditData) {
+  const r = auditData.auditResult;
+  const { error } = await supabase.from('audits').insert({
+    user_id: userId,
+    org_name: auditData.org,
+    facility_type: auditData.facility,
+    state: auditData.state,
+    utility_type: auditData.utility,
+    utility_provider: r.utility_provider || null,
+    account_number: r.account_number || null,
+    billing_period: r.billing_period || null,
+    total_bill_amount: r.total_bill_amount || null,
+    annual_savings_estimate: r.annual_savings_estimate || 0,
+    current_rate_schedule: r.current_rate_schedule || null,
+    recommended_rate_schedule: r.recommended_rate_schedule || null,
+    findings: r.findings || [],
+    bill_summary: r.bill_summary || {},
+    recommendations: r.recommendations || [],
+    status: 'complete'
+  });
+  if (error) console.error('Error saving audit:', error);
 }
 
 function showAuthError(msg) {
@@ -1006,8 +1343,12 @@ function showAuthError(msg) {
 
 function updateNav(loggedIn) {
   const nav = document.getElementById('navActions');
+  const isAdmin = currentUser && ADMIN_EMAILS.includes(currentUser.email);
   if (loggedIn) {
-    nav.innerHTML = `<button class="btn btn-ghost" onclick="showPage('dashboard')">Dashboard</button><button class="btn btn-ghost" onclick="logout()">Log out</button>`;
+    nav.innerHTML = `
+      ${isAdmin ? '<button class="btn btn-ghost" onclick="goToAdmin()">Admin</button>' : ''}
+      <button class="btn btn-ghost" onclick="showPage('dashboard')">Dashboard</button>
+      <button class="btn btn-ghost" onclick="logout()">Log out</button>`;
   } else {
     nav.innerHTML = `<button class="btn btn-ghost" onclick="showModal('login')">Log in</button><button class="btn btn-primary" onclick="showModal('signup')">Get started free</button>`;
   }
@@ -1044,6 +1385,7 @@ function resetAuditUI() {
   setProgress(0, '');
   document.querySelectorAll('.step-item').forEach(s => s.className = 'step-item');
   clearFile();
+  goToStep1();
 }
 
 function fileToBase64(file) {
@@ -1055,7 +1397,120 @@ function fileToBase64(file) {
   });
 }
 
+// ── FAQ ───────────────────────────────────────────────────────
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
 function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── ADMIN ─────────────────────────────────────────────────────
+const ADMIN_EMAILS = ['admin@gatehousestrategic.com']; // add your email here
+
+async function goToAdmin() {
+  if (!currentUser) { showToast('Not logged in'); return; }
+  if (!ADMIN_EMAILS.includes(currentUser.email)) { showToast('Not authorized'); return; }
+  showPage('admin');
+  await adminLoadStats();
+  await adminLoadTab('users');
+}
+
+async function adminLoadStats() {
+  const { data: profiles } = await supabase.from('profiles').select('tier');
+  const { data: audits } = await supabase.from('audits').select('annual_savings_estimate');
+  if (profiles) {
+    document.getElementById('adminStatUsers').textContent = profiles.length;
+    document.getElementById('adminStatPaid').textContent = profiles.filter(p => p.tier !== 'free').length;
+  }
+  if (audits) {
+    document.getElementById('adminStatAudits').textContent = audits.length;
+    const total = audits.reduce((s,a) => s + (a.annual_savings_estimate||0), 0);
+    document.getElementById('adminStatSavings').textContent = '$' + Math.round(total).toLocaleString();
+  }
+}
+
+async function adminLoadTab(tab) {
+  ['users','audits','leads'].forEach(t => {
+    document.getElementById('adminTab' + t.charAt(0).toUpperCase() + t.slice(1))
+      .classList.toggle('btn-primary', t === tab);
+  });
+
+  const table = document.getElementById('adminTable');
+  table.innerHTML = '<div class="empty-audits">Loading...</div>';
+
+  if (tab === 'users') {
+    const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+    if (!data || data.length === 0) { table.innerHTML = '<div class="empty-audits">No users yet</div>'; return; }
+    table.innerHTML = `
+      <div class="audit-row audit-head" style="grid-template-columns:2fr 1fr 1fr 1fr 120px;">
+        <div>User ID</div><div>Tier</div><div>Audits used</div><div>Limit</div><div>Joined</div>
+      </div>` +
+      data.map(u => `
+        <div class="audit-row" style="grid-template-columns:2fr 1fr 1fr 1fr 120px;">
+          <div><div class="audit-facility" style="font-size:12px;font-family:monospace;">${u.id}</div><div class="audit-meta">${u.org_name||'—'}</div></div>
+          <div><select onchange="adminSetTier('${u.id}',this.value)" style="font-size:12px;padding:4px 8px;">
+            ${['free','basic','pro','enterprise'].map(t=>`<option ${u.tier===t?'selected':''}>${t}</option>`).join('')}
+          </select></div>
+          <div class="audit-val">${u.audits_used}</div>
+          <div class="audit-val">${u.audits_limit}</div>
+          <div class="audit-meta">${new Date(u.created_at).toLocaleDateString()}</div>
+        </div>`).join('');
+
+  } else if (tab === 'audits') {
+    const { data } = await supabase.from('audits').select('*').order('created_at', { ascending: false });
+    if (!data || data.length === 0) { table.innerHTML = '<div class="empty-audits">No audits yet</div>'; return; }
+    table.innerHTML = `
+      <div class="audit-row audit-head">
+        <div>Facility</div><div>Utility</div><div>State</div><div>Savings found</div><div>Date</div>
+      </div>` +
+      data.map(a => `
+        <div class="audit-row" onclick="adminViewAudit('${a.id}')" style="cursor:pointer;">
+          <div><div class="audit-facility">${a.org_name}</div><div class="audit-meta">${a.facility_type}</div></div>
+          <div class="audit-val">${a.utility_type}</div>
+          <div class="audit-val">${a.state}</div>
+          <div class="audit-savings">$${Math.round(a.annual_savings_estimate||0).toLocaleString()}/yr</div>
+          <div><span class="status-badge status-complete">${new Date(a.created_at).toLocaleDateString()}</span></div>
+        </div>`).join('');
+
+  } else if (tab === 'leads') {
+    const { data } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
+    if (!data || data.length === 0) { table.innerHTML = '<div class="empty-audits">No leads yet — leads are captured when someone runs the free audit but does not sign up</div>'; return; }
+    table.innerHTML = `
+      <div class="audit-row audit-head" style="grid-template-columns:2fr 1fr 1fr 1fr;">
+        <div>Organization</div><div>State</div><div>Savings shown</div><div>Date</div>
+      </div>` +
+      data.map(l => `
+        <div class="audit-row" style="grid-template-columns:2fr 1fr 1fr 1fr;">
+          <div><div class="audit-facility">${l.org_name}</div><div class="audit-meta">${l.facility_type} · ${l.utility_type}</div></div>
+          <div class="audit-val">${l.state}</div>
+          <div class="audit-savings">$${Math.round(l.savings_shown||0).toLocaleString()}/yr</div>
+          <div class="audit-meta">${new Date(l.created_at).toLocaleDateString()}</div>
+        </div>`).join('');
+  }
+}
+
+async function adminSetTier(userId, tier) {
+  const limits = { free:1, basic:2, pro:10, enterprise:999 };
+  const { error } = await supabase.from('profiles')
+    .update({ tier, audits_limit: limits[tier] || 1 })
+    .eq('id', userId);
+  if (error) showToast('Error updating tier');
+  else showToast('Tier updated to ' + tier);
+}
+
+async function adminViewAudit(auditId) {
+  await loadAndViewReport(auditId);
+}
+
+
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
@@ -1071,6 +1526,11 @@ document.getElementById('authModal').addEventListener('click', e => {
 if (supabase) {
   supabase.auth.getSession().then(({ data }) => {
     if (data.session?.user) showDashboard(data.session.user);
+  });
+
+  // Keep session in sync across tabs
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT') { currentUser = null; updateNav(false); showPage('landing'); }
   });
 }
 </script>
