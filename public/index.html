@@ -30,7 +30,7 @@
     --shadow-lg: 0 8px 40px rgba(15,110,86,0.15);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--surface); color: var(--text); line-height: 1.6; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--surface); color: var(--text); line-height: 1.6; overflow-x: hidden; }
 
   /* NAV */
   nav { background: white; border-bottom: 1px solid rgba(15,110,86,0.1); padding: 0 2.5rem; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 12px rgba(15,110,86,0.08); }
@@ -61,6 +61,7 @@
     overflow: hidden;
     position: relative;
     width: 100%;
+    box-sizing: border-box;
   }
   .hero-grid {
     position: absolute; inset: 0;
@@ -1999,20 +2000,18 @@ document.getElementById('authModal').addEventListener('click', e => {
   if (e.target === document.getElementById('authModal')) closeModal();
 });
 
-// Initialize nav immediately on load
-updateNav(false);
-
-// Check existing session on load
-if (supabase) {
-  supabase.auth.getSession().then(({ data }) => {
-    if (data.session?.user) showDashboard(data.session.user);
-  });
-
-  // Keep session in sync across tabs
-  supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_OUT') { currentUser = null; updateNav(false); showPage('landing'); }
-  });
-}
+// Initialize nav and session on load
+document.addEventListener('DOMContentLoaded', () => {
+  updateNav(false);
+  if (supabase) {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) showDashboard(data.session.user);
+    });
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') { currentUser = null; updateNav(false); showPage('landing'); }
+    });
+  }
+});
 </script>
 </body>
 </html>
