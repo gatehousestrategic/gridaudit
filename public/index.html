@@ -85,7 +85,7 @@
   .hero-sub { font-size: 18px; color: rgba(255,255,255,0.75); max-width: 580px; margin-bottom: 48px; line-height: 1.65; }
 
   /* HERO STATS */
-  .hero-stats { display: flex; gap: 0; }
+  .hero-stats { display: flex; gap: 0; margin-bottom: 0; }
   .hero-stat { padding-right: 40px; }
   .hero-stat:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.15); margin-right: 40px; }
   .hero-stat-num { font-size: 36px; font-weight: 800; color: white; letter-spacing: -1.5px; line-height: 1; }
@@ -351,10 +351,10 @@
           <div class="hero-stat-label">Tariff coverage</div>
         </div>
       </div>
-      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:40px;">
         <button class="btn btn-primary btn-lg" onclick="document.getElementById('uploadCard').scrollIntoView({behavior:'smooth'})">Upload your bill →</button>
-        <button onclick="runDemo()" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:14px 24px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
-          <span style="font-size:18px;">▶</span> Watch a live demo
+        <button onclick="runDemo()" style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.3);color:white;padding:14px 28px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.2s;letter-spacing:-0.2px;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+          <span style="font-size:16px;">▶</span> Watch a live demo
         </button>
       </div>
     </div>
@@ -1852,7 +1852,7 @@ function showFullReport(result, org, facility, state, utility) {
   // Bill summary
   document.getElementById('reportBillSummary').innerHTML = `
     <div style="background:var(--surface);border-radius:12px;border:1px solid var(--border);overflow:hidden;">
-      ${[['Billing period', result.billing_period],['Provider',result.utility_provider],['Account',result.account_number||'—'],['Current rate',result.current_rate_schedule],['Recommended rate',result.recommended_rate_schedule||'(no change needed)'],['Total bill','$'+(result.total_bill_amount||0).toLocaleString()]].map(([l,v])=>`<div class="detail-row"><div class="detail-label">${l}</div><div class="detail-value">${v}</div></div>`).join('')}
+      ${[['Billing period', result.billing_period],['Provider',result.utility_provider],['Account',result.account_number||'—'],['Current rate',result.current_rate_schedule],['Recommended rate',result.recommended_rate_schedule||'(no change needed)'],['Total bill','$'+(result.total_bill_amount||0).toLocaleString()]].map(([l,v])=>`<div class="detail-row" style="padding:14px 20px;"><div class="detail-label">${l}</div><div class="detail-value">${v}</div></div>`).join('')}
     </div>`;
 
   // Findings
