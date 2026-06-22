@@ -650,7 +650,7 @@
         <div style="font-size:22px; font-weight:800; color:var(--text); letter-spacing:-0.5px; margin-bottom:6px;">This is the bill GridAudit is about to audit</div>
         <div style="font-size:14px; color:var(--text-muted);">Procedurally generated — unique utility, facility, charges, and account number every time. Click Run free audit below to see the full analysis.</div>
       </div>
-      <canvas id="demoBillCanvas" style="width:100%; border-radius:14px; border:1px solid rgba(15,110,86,0.2); display:block; box-shadow:0 8px 32px rgba(15,110,86,0.12);"></canvas>
+      <canvas id="demoBillCanvas" style="width:100%; height:auto; border-radius:14px; border:1px solid rgba(15,110,86,0.2); display:block; box-shadow:0 8px 32px rgba(15,110,86,0.12);"></canvas>
     </div>
   </div>
 
@@ -1165,10 +1165,14 @@ function runDemo() {
 
   showPage('demo');
 
-  const canvas = document.getElementById('demoBillCanvas');
-  canvas.width = 900;
-  canvas.height = Math.round(900 * (1056/816));
-  renderBillToCanvas(canvas.getContext('2d'), demo);
+  // Render after page is visible
+  setTimeout(() => {
+    const canvas = document.getElementById('demoBillCanvas');
+    canvas.width = 816;
+    canvas.height = 1056;
+    const ctx = canvas.getContext('2d');
+    renderBillToCanvas(ctx, demo);
+  }, 50);
 
   document.getElementById('demoFacilityInfo').innerHTML =
     `<strong>${demo.facilityName}</strong> &nbsp;·&nbsp; ${demo.facilityType} &nbsp;·&nbsp; ${demo.state} &nbsp;·&nbsp; ${demo.utility.name} &nbsp;·&nbsp; ${demo.utilityType}`;
