@@ -57,7 +57,7 @@
   /* ── HERO ─────────────────────────────────────────────────── */
   .hero-section {
     background: linear-gradient(160deg, #04342C 0%, #0F6E56 55%, #1D9E75 100%);
-    padding: 100px 2.5rem 120px;
+    padding: 72px 2.5rem 100px;
     overflow: hidden;
     position: relative;
     width: 100%;
@@ -76,20 +76,20 @@
     background: radial-gradient(circle, rgba(93,202,165,0.2) 0%, transparent 65%);
     pointer-events: none;
   }
-  .hero-inner { max-width: 860px; margin: 0 auto; position: relative; z-index: 1; }
+  .hero-inner { max-width: 620px; margin: 0 auto; position: relative; z-index: 1; }
   .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: rgba(255,255,255,0.9); margin-bottom: 28px; }
   .hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: #5DCAA5; animation: pulse-dot 2s infinite; flex-shrink:0; }
   @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
-  .hero-h1 { font-size: clamp(38px, 5.5vw, 64px); font-weight: 800; line-height: 1.1; letter-spacing: -2px; color: white !important; margin-bottom: 24px; }
+  .hero-h1 { font-size: clamp(32px, 4.5vw, 52px); font-weight: 800; line-height: 1.1; letter-spacing: -2px; color: white !important; margin-bottom: 20px; }
   .hero-h1 em { font-style: normal; color: #5DCAA5; }
-  .hero-sub { font-size: 18px; color: rgba(255,255,255,0.75); max-width: 580px; margin-bottom: 48px; line-height: 1.65; }
+  .hero-sub { font-size: 16px; color: rgba(255,255,255,0.75); margin-bottom: 32px; line-height: 1.65; }
 
   /* HERO STATS */
   .hero-stats { display: flex; gap: 0; margin-bottom: 0; }
-  .hero-stat { padding-right: 40px; }
-  .hero-stat:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.15); margin-right: 40px; }
-  .hero-stat-num { font-size: 36px; font-weight: 800; color: white; letter-spacing: -1.5px; line-height: 1; }
-  .hero-stat-label { font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+  .hero-stat { padding-right: 32px; }
+  .hero-stat:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.15); margin-right: 32px; }
+  .hero-stat-num { font-size: 28px; font-weight: 800; color: white; letter-spacing: -1px; line-height: 1; }
+  .hero-stat-label { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
 
   /* UPLOAD CARD — floats below hero */
   .upload-float { max-width: 620px; margin: -40px auto 0; padding: 0 2rem 80px; position: relative; z-index: 10; }
@@ -361,18 +361,20 @@
   </div>
 
   <!-- DEMO BILL SECTION - full width, shown when demo is running -->
-  <div id="demoBillSection" style="display:none; background:var(--surface-2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:40px 2rem;">
-    <div style="max-width:960px; margin:0 auto;">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+  <div id="demoBillSection" style="display:none; background:#f0f7f4; border-top:3px solid var(--brand-mid); border-bottom:3px solid var(--brand-mid); padding:48px 2rem;">
+    <div style="max-width:900px; margin:0 auto;">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
         <div>
-          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--brand); margin-bottom:4px;">Live demo — generated for this session</div>
-          <div style="font-size:18px; font-weight:700; color:var(--text);">This is the bill GridAudit is about to audit</div>
-          <div style="font-size:14px; color:var(--text-muted); margin-top:2px;">Every detail is procedurally generated — utility, facility, charges, account number. Unique each time.</div>
+          <div style="display:inline-flex;align-items:center;gap:8px;background:var(--brand);color:white;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:5px 12px;border-radius:20px;margin-bottom:10px;">
+            <span style="width:6px;height:6px;background:#5DCAA5;border-radius:50%;display:inline-block;"></span> Live demo — generated for this session
+          </div>
+          <div style="font-size:22px; font-weight:800; color:var(--text); letter-spacing:-0.5px;">This is the bill GridAudit is about to audit</div>
+          <div style="font-size:14px; color:var(--text-muted); margin-top:6px;">Every detail is unique — utility, facility, charges, account number. Scroll down and click Run free audit.</div>
         </div>
-        <button class="btn btn-ghost" onclick="runDemo()" style="flex-shrink:0;">Generate a different bill ↺</button>
+        <button class="btn btn-ghost" onclick="runDemo()" style="flex-shrink:0; white-space:nowrap;">↺ Generate a different bill</button>
       </div>
-      <canvas id="demoBillCanvas" style="width:100%; max-width:960px; border-radius:12px; border:1px solid var(--border); display:block; box-shadow:0 4px 24px rgba(0,0,0,0.08);"></canvas>
-      <p style="font-size:12px; color:var(--text-hint); margin-top:10px; text-align:center;">Scroll down to see the audit results after clicking Run free audit ↓</p>
+      <canvas id="demoBillCanvas" style="width:100%; border-radius:14px; border:1px solid rgba(15,110,86,0.2); display:block; box-shadow:0 8px 32px rgba(15,110,86,0.12);"></canvas>
+      <p style="font-size:13px; color:var(--text-hint); margin-top:14px; text-align:center;">↓ Scroll down and click <strong>Run free audit</strong> to see GridAudit analyze this bill</p>
     </div>
   </div>
 
