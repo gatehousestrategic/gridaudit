@@ -1038,134 +1038,313 @@ function onUtilitySelected(select) {
 
 // ── DEMO MODE ─────────────────────────────────────────────────
 function runDemo() {
-  const scenarios = [
-    {
-      org: 'Sunrise Manor SNF', facility: 'snf', state: 'New York', utility: 'electric',
-      result: {
-        utility_provider: 'Con Edison',
-        account_number: '4821-' + Math.floor(1000+Math.random()*9000),
-        billing_period: 'May 2025',
-        current_rate_schedule: 'SC-8 General Service Large',
-        recommended_rate_schedule: 'SC-8H Healthcare Large',
-        total_bill_amount: 9240,
-        annual_savings_estimate: Math.floor(4800 + Math.random() * 2400),
-        rate_data_used: true,
-        findings: [
-          { type: 'rate_misclassification', title: 'Wrong rate schedule for healthcare facility', description: 'As a licensed SNF, you qualify for SC-8H Healthcare Large which carries a 12% lower base rate. You have been billed under SC-8 General Service since account opening in 2019.', billed_amount: 5840, correct_amount: 5139, monthly_savings: 310, confidence: 'high', action_required: 'File rate reclassification request with Con Edison billing department' },
-          { type: 'tax_exemption', title: 'NYS sales tax charged on exempt usage', description: 'Skilled nursing facilities are exempt from New York State sales tax on utility services under Tax Law §1116(a). You have been charged $142/month in tax you do not legally owe.', billed_amount: 142, correct_amount: 0, monthly_savings: 142, confidence: 'high', action_required: 'Submit Form ST-119.1 exemption certificate to Con Edison' },
-          { type: 'demand_error', title: 'Demand ratchet applied at incorrect percentage', description: 'The 12-month demand ratchet is being calculated at 85% of your peak monthly demand. Your rate schedule specifies 75%. This error has been compounding for at least 8 billing cycles.', billed_amount: 1820, correct_amount: 1607, monthly_savings: 68, confidence: 'medium', action_required: 'Request formal demand charge review for past 12 months' }
-        ],
-        bill_summary: { energy_charges: 5840, demand_charges: 1820, taxes_fees: 1280, other: 300 },
-        recommendations: ['File rate reclassification to SC-8H immediately — recoveries apply retroactively up to 24 months in NY', 'Submit ST-119.1 sales tax exemption certificate — estimated $3,408 in retroactive refunds', 'Request demand charge audit covering the past 12 billing cycles', 'Schedule annual bill review to catch future rate changes']
-      }
-    },
-    {
-      org: 'Riverside Apartments', facility: 'multifamily', state: 'New Jersey', utility: 'electric',
-      result: {
-        utility_provider: 'PSE&G',
-        account_number: '7733-' + Math.floor(1000+Math.random()*9000),
-        billing_period: 'April 2025',
-        current_rate_schedule: 'LPL Large Power & Light',
-        recommended_rate_schedule: 'TOD Time-of-Day Large',
-        total_bill_amount: 7180,
-        annual_savings_estimate: Math.floor(3600 + Math.random() * 2000),
-        rate_data_used: true,
-        findings: [
-          { type: 'rate_misclassification', title: 'Time-of-day schedule would reduce costs', description: 'Based on your demand profile, PSE&G\'s TOD rate schedule would reduce your monthly bill. Your peak demand occurs primarily during off-peak hours (evenings and weekends), making TOD pricing significantly more favorable.', billed_amount: 4200, correct_amount: 3640, monthly_savings: 226, confidence: 'high', action_required: 'Request rate schedule change to TOD through PSE&G account portal' },
-          { type: 'fuel_adjustment', title: 'Fuel adjustment charge calculated incorrectly', description: 'The Market Transition Charge applied this month is $0.00312/kWh. The PSE&G tariff-specified rate for this period is $0.00287/kWh — a difference of $0.00025/kWh applied to 48,000 kWh of usage.', billed_amount: 150, correct_amount: 138, monthly_savings: 12, confidence: 'medium', action_required: 'File billing dispute citing PSE&G Tariff Schedule MTR' },
-          { type: 'math_error', title: 'Meter multiplier applied incorrectly', description: 'Your CT meter has a multiplier of 40. This billing period shows a multiplier of 42 was applied to the raw meter reading, resulting in an overcharge of approximately 5% on energy charges.', billed_amount: 4200, correct_amount: 3990, monthly_savings: 79, confidence: 'high', action_required: 'Request meter test and billing correction from PSE&G' }
-        ],
-        bill_summary: { energy_charges: 4200, demand_charges: 1840, taxes_fees: 820, other: 320 },
-        recommendations: ['Switch to TOD rate schedule before next billing cycle — no equipment changes required', 'Dispute fuel adjustment overcharge with specific tariff citation', 'Request meter inspection and retroactive billing correction', 'Install interval meter if not already present to optimize TOD pricing']
-      }
-    },
-    {
-      org: 'Keystone Manufacturing LLC', facility: 'manufacturing', state: 'Pennsylvania', utility: 'electric',
-      result: {
-        utility_provider: 'PECO Energy',
-        account_number: '2291-' + Math.floor(1000+Math.random()*9000),
-        billing_period: 'March 2025',
-        current_rate_schedule: 'HT High Tension',
-        recommended_rate_schedule: 'HT-Interruptible',
-        total_bill_amount: 22400,
-        annual_savings_estimate: Math.floor(7200 + Math.random() * 4000),
-        rate_data_used: true,
-        findings: [
-          { type: 'tax_exemption', title: 'PA sales tax on manufacturing energy not exempt', description: 'Pennsylvania exempts electricity used directly in the manufacturing process from state sales tax. Your account is being charged the full 6% PA sales tax on all consumption. Qualifying manufacturing consumption should be 0%.', billed_amount: 1140, correct_amount: 0, monthly_savings: 380, confidence: 'high', action_required: 'File Form REV-1220 exemption certificate with PECO' },
-          { type: 'rate_misclassification', title: 'Interruptible service rate available', description: 'Your load profile qualifies for PECO\'s HT-Interruptible rate, which offers a $4.20/kW discount on demand charges in exchange for allowing PECO to interrupt service up to 10 times per year (typically never exercised). Based on your 280kW demand, this saves $1,176/month.', billed_amount: 8960, correct_amount: 7784, monthly_savings: 234, confidence: 'medium', action_required: 'Apply for interruptible service designation through PECO large account team' },
-          { type: 'demand_error', title: 'Peak demand recorded during maintenance shutdown', description: 'Your highest recorded demand this month (312 kW) occurred on a Saturday morning during what appears to be equipment startup after maintenance. This single reading is driving your demand charges for the month. Demand response controls could eliminate this.', billed_amount: 8960, correct_amount: 7280, monthly_savings: 140, confidence: 'medium', action_required: 'Install demand management controls to stagger equipment startup' }
-        ],
-        bill_summary: { energy_charges: 11200, demand_charges: 8960, taxes_fees: 1680, other: 560 },
-        recommendations: ['File manufacturing exemption certificate immediately — retroactive refunds available for 3 years in PA', 'Apply for interruptible service rate — rarely actually interrupted in practice', 'Implement demand management to avoid startup spikes driving monthly demand charges', 'Consider power factor correction equipment to reduce reactive demand charges']
-      }
-    },
-    {
-      org: 'Lakeview Assisted Living', facility: 'assisted', state: 'Florida', utility: 'gas',
-      result: {
-        utility_provider: 'Florida City Gas',
-        account_number: '5514-' + Math.floor(1000+Math.random()*9000),
-        billing_period: 'February 2025',
-        current_rate_schedule: 'GS-2 General Service',
-        recommended_rate_schedule: 'GS-2H Healthcare Service',
-        total_bill_amount: 3840,
-        annual_savings_estimate: Math.floor(2400 + Math.random() * 1600),
-        rate_data_used: true,
-        findings: [
-          { type: 'rate_misclassification', title: 'Healthcare rate schedule not applied', description: 'Florida City Gas offers a separate rate schedule for licensed healthcare facilities including assisted living communities. GS-2H carries a lower distribution charge and reduced customer charge compared to your current GS-2 General Service classification.', billed_amount: 2100, correct_amount: 1820, monthly_savings: 163, confidence: 'high', action_required: 'Submit Florida healthcare facility license to Florida City Gas rate desk' },
-          { type: 'math_error', title: 'Billing calculation error on distribution charge', description: 'The distribution charge this period was calculated as $0.4821/therm. The current Florida City Gas tariff for GS-2 specifies $0.4614/therm. The $0.0207/therm difference applied to 892 therms results in an $18.46 overcharge this month.', billed_amount: 430, correct_amount: 412, monthly_savings: 18, confidence: 'high', action_required: 'File billing dispute citing Florida City Gas Rate Schedule GS-2, Section 4.2' }
-        ],
-        bill_summary: { energy_charges: 2100, demand_charges: 0, taxes_fees: 420, other: 1320 },
-        recommendations: ['Request reclassification to GS-2H Healthcare rate — file with facility license documentation', 'Dispute distribution charge calculation error citing specific tariff rate', 'Review last 12 months for the same calculation error — file for retroactive credit']
+  const demo = generateDemoBill();
+
+  // Convert canvas to blob and set as selected file
+  const canvas = document.createElement('canvas');
+  canvas.width = 816;
+  canvas.height = 1056;
+  const ctx = canvas.getContext('2d');
+  renderBillToCanvas(ctx, demo);
+
+  canvas.toBlob(blob => {
+    const file = new File([blob], `utility-bill-${demo.accountNumber}.png`, { type: 'image/png' });
+    selectedFile = file;
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSelected').classList.add('show');
+
+    // Pre-fill form fields
+    goToStep2(true);
+    document.getElementById('orgName').value = demo.facilityName;
+    document.getElementById('facilityType').value = demo.facilityType;
+
+    // Set state dropdown
+    const stateSelect = document.getElementById('stateSelect');
+    for (let i = 0; i < stateSelect.options.length; i++) {
+      if (stateSelect.options[i].text === demo.state) {
+        stateSelect.selectedIndex = i;
+        break;
       }
     }
+    loadCounties(demo.state);
+
+    // Select utility type button
+    document.querySelectorAll('.util-btn').forEach(b => b.classList.remove('selected'));
+    const utilBtn = document.querySelector(`.util-btn[onclick*="${demo.utilityType}"]`);
+    if (utilBtn) { utilBtn.classList.add('selected'); }
+    document.getElementById('utilityType').value = demo.utilityType;
+
+    showToast('Demo bill loaded — click Run free audit to continue');
+  }, 'image/png');
+}
+
+function generateDemoBill() {
+  const utilities = [
+    { name:'Con Edison', state:'New York', stateCode:'NY', type:'electric', logo:'ConEd' },
+    { name:'National Grid', state:'New York', stateCode:'NY', type:'electric', logo:'NG' },
+    { name:'PSE&G', state:'New Jersey', stateCode:'NJ', type:'electric', logo:'PSEG' },
+    { name:'PECO Energy', state:'Pennsylvania', stateCode:'PA', type:'electric', logo:'PECO' },
+    { name:'Florida Power & Light', state:'Florida', stateCode:'FL', type:'electric', logo:'FPL' },
+    { name:'Duke Energy', state:'Florida', stateCode:'FL', type:'electric', logo:'Duke' },
+    { name:'Pacific Gas & Electric', state:'California', stateCode:'CA', type:'electric', logo:'PGE' },
+    { name:'Southern California Edison', state:'California', stateCode:'CA', type:'electric', logo:'SCE' },
+    { name:'Oncor Electric', state:'Texas', stateCode:'TX', type:'electric', logo:'Oncor' },
+    { name:'CenterPoint Energy', state:'Texas', stateCode:'TX', type:'electric', logo:'CNP' },
+    { name:'ComEd', state:'Illinois', stateCode:'IL', type:'electric', logo:'ComEd' },
+    { name:'Dominion Energy', state:'Virginia', stateCode:'VA', type:'electric', logo:'Dom' },
+    { name:'Georgia Power', state:'Georgia', stateCode:'GA', type:'electric', logo:'GP' },
+    { name:'DTE Energy', state:'Michigan', stateCode:'MI', type:'electric', logo:'DTE' },
+    { name:'Eversource', state:'Massachusetts', stateCode:'MA', type:'electric', logo:'Ever' },
+    { name:'National Grid', state:'Massachusetts', stateCode:'MA', type:'gas', logo:'NG' },
+    { name:'Nicor Gas', state:'Illinois', stateCode:'IL', type:'gas', logo:'Nicor' },
+    { name:'Puget Sound Energy', state:'Washington', stateCode:'WA', type:'electric', logo:'PSE' },
+    { name:'Xcel Energy', state:'Colorado', stateCode:'CO', type:'electric', logo:'Xcel' },
+    { name:'Baltimore Gas & Electric', state:'Maryland', stateCode:'MD', type:'electric', logo:'BGE' },
   ];
 
-  // Pick a random scenario
-  const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
-  
-  // Add some randomness to savings
-  scenario.result.annual_savings_estimate = Math.floor(scenario.result.annual_savings_estimate);
+  const facilityTypes = [
+    { type:'snf', names:['Sunrise Manor','Oakwood Care','Riverside Nursing','Lakeview SNF','Heritage Care Center','Pineview Skilled Nursing','Valley Rest Home','Meadowbrook SNF'] },
+    { type:'assisted', names:['Sunrise Assisted Living','Garden View ALF','Peaceful Pines AL','Brookhaven Assisted','Harmony House','Sunrise Senior Living','The Arbors','Willow Creek AL'] },
+    { type:'multifamily', names:['Riverfront Apartments','The Pines at Oak','Metro Flats','Harbor View Apts','Elmwood Residences','The Grand at Main','Parkside Commons','Lakeview Towers'] },
+    { type:'manufacturing', names:['Keystone Manufacturing','Midwest Fabricators','Eastern Industrial','Precision Parts Co','Allied Manufacturing','Summit Industrial','CoreTech Industries','United Fabrication'] },
+    { type:'commercial', names:['Commerce Center','Lakeside Office Park','Metro Business Plaza','Gateway Corporate','Riverside Office','Summit Business Center','Parkway Professional','Harbor Commerce'] },
+  ];
 
-  // Show progress animation then results
-  const btn = document.getElementById('auditBtn') || document.getElementById('nextStepBtn');
-  
-  // Go to step 2 visually if on step 1
-  if (document.getElementById('uploadStep1').style.display !== 'none') {
-    goToStep2();
-  }
+  const rateSchedules = {
+    electric: ['SC-8 General Service Large','GS-3 General Service','HT High Tension','LPL Large Power & Light','GSD General Service Demand','CS Commercial Service','TOU-GS Time of Use General Service','LGS Large General Service'],
+    gas: ['GS-2 General Service','SC-3 Commercial Large','GDS General Delivery Service','T-3 Transportation Service']
+  };
 
-  document.getElementById('pill2').classList.remove('active');
-  document.getElementById('pill2').classList.add('done');
-  document.getElementById('pill3').classList.add('active');
+  const streets = ['Main St','Oak Ave','Riverside Dr','Commerce Blvd','Industrial Pkwy','Lakeview Rd','Market St','Enterprise Ave','Summit Dr','Harbor Blvd'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-  const progressWrap = document.getElementById('progressWrap');
-  progressWrap.classList.add('show');
+  const util = utilities[Math.floor(Math.random() * utilities.length)];
+  const facGroup = facilityTypes[Math.floor(Math.random() * facilityTypes.length)];
+  const facName = facGroup.names[Math.floor(Math.random() * facGroup.names.length)];
+  const schedule = rateSchedules[util.type][Math.floor(Math.random() * rateSchedules[util.type].length)];
+  const month = months[Math.floor(Math.random() * 12)];
+  const year = 2025;
+  const billDate = `${month} 1, ${year}`;
+  const dueDate = `${month} 25, ${year}`;
 
-  runProgress([
-    { label: 'Extracting line items from bill...', pct: 25, stepId: 'step1' },
-    { label: 'Identifying rate schedule...', pct: 50, stepId: 'step2' },
-    { label: 'Comparing to published rate data...', pct: 75, stepId: 'step3' },
-    { label: 'Calculating exact savings...', pct: 95, stepId: 'step4' }
-  ]).then(() => {
-    setProgress(100, 'Analysis complete');
-    pendingAuditData = {
-      org: scenario.org,
-      facility: scenario.facility,
-      state: scenario.state,
-      utility: scenario.utility,
-      utilityId: null,
-      auditResult: scenario.result
-    };
-    setTimeout(() => {
-      showResultsPage(scenario.result, scenario.org, scenario.facility, scenario.state, scenario.utility);
-      resetAuditUI();
-    }, 600);
+  const streetNum = Math.floor(100 + Math.random() * 9900);
+  const street = streets[Math.floor(Math.random() * streets.length)];
+  const zip = String(Math.floor(10000 + Math.random() * 89999));
+
+  const accountNum = `${Math.floor(1000+Math.random()*9000)}-${Math.floor(100+Math.random()*900)}-${Math.floor(1000+Math.random()*9000)}`;
+  const meterNum = `M${Math.floor(100000+Math.random()*900000)}`;
+
+  // Generate realistic charges
+  const isLarge = ['snf','manufacturing','multifamily'].includes(facGroup.type);
+  const baseKwh = isLarge ? Math.floor(18000+Math.random()*35000) : Math.floor(4000+Math.random()*12000);
+  const energyRate = util.type === 'electric' ? (0.08 + Math.random()*0.09).toFixed(4) : (0.45+Math.random()*0.35).toFixed(4);
+  const energyCharge = (baseKwh * parseFloat(energyRate)).toFixed(2);
+
+  const demandKw = isLarge ? Math.floor(80+Math.random()*280) : Math.floor(15+Math.random()*60);
+  const demandRate = (8+Math.random()*14).toFixed(2);
+  const demandCharge = util.type === 'electric' ? (demandKw * parseFloat(demandRate)).toFixed(2) : '0.00';
+
+  const customerCharge = (isLarge ? 28+Math.random()*42 : 12+Math.random()*18).toFixed(2);
+  const fuelAdj = util.type === 'electric' ? (baseKwh * (0.002+Math.random()*0.004)).toFixed(2) : '0.00';
+  const systemBenefit = (parseFloat(energyCharge) * (0.015+Math.random()*0.01)).toFixed(2);
+  const salesTax = (parseFloat(energyCharge) * (0.06+Math.random()*0.03)).toFixed(2);
+  const totalAmount = (parseFloat(energyCharge)+parseFloat(demandCharge)+parseFloat(customerCharge)+parseFloat(fuelAdj)+parseFloat(systemBenefit)+parseFloat(salesTax)).toFixed(2);
+
+  const prevReading = Math.floor(50000+Math.random()*500000);
+  const currReading = prevReading + baseKwh;
+
+  return {
+    utility: util, facilityName: facName, facilityType: facGroup.type,
+    state: util.state, stateCode: util.stateCode, utilityType: util.type,
+    address: `${streetNum} ${street}`, zip, accountNumber: accountNum,
+    meterNumber: meterNum, rateSchedule: schedule,
+    billDate, dueDate, month, year,
+    baseKwh, energyRate, energyCharge, demandKw, demandRate, demandCharge,
+    customerCharge, fuelAdj, systemBenefit, salesTax, totalAmount,
+    prevReading, currReading
+  };
+}
+
+function renderBillToCanvas(ctx, d) {
+  const w = 816, h = 1056;
+  const ut = d.utility;
+
+  // White background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, w, h);
+
+  // Header bar
+  ctx.fillStyle = '#1a1a2e';
+  ctx.fillRect(0, 0, w, 90);
+
+  // Utility name
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 28px Arial';
+  ctx.fillText(ut.name, 40, 38);
+  ctx.font = '14px Arial';
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.fillText('UTILITY BILL', 40, 60);
+  ctx.fillText(`${d.month} ${d.year}`, 40, 78);
+
+  // Amount due box
+  ctx.fillStyle = '#0F6E56';
+  ctx.fillRect(w-220, 10, 200, 70);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '12px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('AMOUNT DUE', w-120, 32);
+  ctx.font = 'bold 26px Arial';
+  ctx.fillText(`$${parseFloat(d.totalAmount).toLocaleString('en-US',{minimumFractionDigits:2})}`, w-120, 62);
+  ctx.font = '11px Arial';
+  ctx.fillText(`DUE ${d.dueDate}`, w-120, 78);
+  ctx.textAlign = 'left';
+
+  // Account info section
+  ctx.fillStyle = '#f8f8f8';
+  ctx.fillRect(0, 90, w, 100);
+  ctx.strokeStyle = '#e0e0e0';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0,190); ctx.lineTo(w,190); ctx.stroke();
+
+  ctx.fillStyle = '#333';
+  ctx.font = 'bold 13px Arial';
+  ctx.fillText('SERVICE ADDRESS', 40, 115);
+  ctx.font = '13px Arial';
+  ctx.fillStyle = '#555';
+  ctx.fillText(d.facilityName, 40, 133);
+  ctx.fillText(d.address, 40, 150);
+  ctx.fillText(`${d.state} ${d.zip}`, 40, 167);
+
+  ctx.fillStyle = '#333';
+  ctx.font = 'bold 13px Arial';
+  ctx.fillText('ACCOUNT NUMBER', 280, 115);
+  ctx.font = '13px Arial';
+  ctx.fillStyle = '#555';
+  ctx.fillText(d.accountNumber, 280, 133);
+  ctx.font = 'bold 13px Arial';
+  ctx.fillStyle = '#333';
+  ctx.fillText('RATE SCHEDULE', 280, 155);
+  ctx.font = '12px Arial';
+  ctx.fillStyle = '#555';
+  ctx.fillText(d.rateSchedule, 280, 172);
+
+  ctx.fillStyle = '#333';
+  ctx.font = 'bold 13px Arial';
+  ctx.fillText('BILLING PERIOD', 560, 115);
+  ctx.font = '13px Arial';
+  ctx.fillStyle = '#555';
+  ctx.fillText(`${d.month} 1 - ${d.month} 31, ${d.year}`, 560, 133);
+  ctx.font = 'bold 13px Arial';
+  ctx.fillStyle = '#333';
+  ctx.fillText('METER NUMBER', 560, 155);
+  ctx.font = '13px Arial';
+  ctx.fillStyle = '#555';
+  ctx.fillText(d.meterNumber, 560, 172);
+
+  // Meter reading section
+  let y = 210;
+  ctx.fillStyle = '#0F6E56';
+  ctx.font = 'bold 14px Arial';
+  ctx.fillText('METER READING DETAILS', 40, y);
+  y += 20;
+  ctx.strokeStyle = '#0F6E56';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(40,y); ctx.lineTo(w-40,y); ctx.stroke();
+  y += 20;
+
+  ctx.fillStyle = '#666';
+  ctx.font = 'bold 12px Arial';
+  const cols = [40, 200, 360, 520, 650];
+  ['METER', 'PREVIOUS', 'CURRENT', 'USAGE', 'MULTIPLIER'].forEach((h, i) => {
+    ctx.fillText(h, cols[i], y);
   });
+  y += 18;
+  ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(40,y); ctx.lineTo(w-40,y); ctx.stroke();
+  y += 15;
+
+  ctx.font = '13px Arial';
+  ctx.fillStyle = '#333';
+  const unit = d.utilityType === 'electric' ? 'kWh' : 'Therms';
+  [d.meterNumber, d.prevReading.toLocaleString(), d.currReading.toLocaleString(), `${d.baseKwh.toLocaleString()} ${unit}`, '1.0'].forEach((v, i) => {
+    ctx.fillText(v, cols[i], y);
+  });
+  y += 35;
+
+  // Charges section
+  ctx.fillStyle = '#0F6E56';
+  ctx.font = 'bold 14px Arial';
+  ctx.fillText('CURRENT CHARGES', 40, y);
+  y += 20;
+  ctx.strokeStyle = '#0F6E56'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(40,y); ctx.lineTo(w-40,y); ctx.stroke();
+  y += 5;
+
+  const charges = [
+    [`Customer Charge`, `$${d.customerCharge}`],
+    [d.utilityType === 'electric' ? `Energy Charge (${d.baseKwh.toLocaleString()} kWh @ $${d.energyRate})` : `${unit} Charge (${d.baseKwh.toLocaleString()} @ $${d.energyRate})`, `$${parseFloat(d.energyCharge).toLocaleString('en-US',{minimumFractionDigits:2})}`],
+    ...(d.utilityType === 'electric' ? [[`Demand Charge (${d.demandKw} kW @ $${d.demandRate})`, `$${parseFloat(d.demandCharge).toLocaleString('en-US',{minimumFractionDigits:2})}`]] : []),
+    [`Fuel Adjustment Charge`, `$${d.fuelAdj}`],
+    [`System Benefit Charge`, `$${d.systemBenefit}`],
+    [`State & Local Sales Tax (${((parseFloat(d.salesTax)/parseFloat(d.energyCharge))*100).toFixed(1)}%)`, `$${parseFloat(d.salesTax).toLocaleString('en-US',{minimumFractionDigits:2})}`],
+  ];
+
+  charges.forEach(([label, amount]) => {
+    y += 28;
+    ctx.strokeStyle = '#f0f0f0'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(40,y-8); ctx.lineTo(w-40,y-8); ctx.stroke();
+    ctx.fillStyle = '#444';
+    ctx.font = '13px Arial';
+    ctx.fillText(label, 54, y);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#222';
+    ctx.font = 'bold 13px Arial';
+    ctx.fillText(amount, w-40, y);
+    ctx.textAlign = 'left';
+  });
+
+  // Total
+  y += 20;
+  ctx.fillStyle = '#1a1a2e';
+  ctx.fillRect(40, y, w-80, 40);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 15px Arial';
+  ctx.fillText('TOTAL AMOUNT DUE', 60, y+25);
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 18px Arial';
+  ctx.fillText(`$${parseFloat(d.totalAmount).toLocaleString('en-US',{minimumFractionDigits:2})}`, w-55, y+25);
+  ctx.textAlign = 'left';
+
+  y += 60;
+
+  // Messages section
+  ctx.fillStyle = '#fff8e1';
+  ctx.fillRect(40, y, w-80, 55);
+  ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 1.5;
+  ctx.strokeRect(40, y, w-80, 55);
+  ctx.fillStyle = '#92400e';
+  ctx.font = 'bold 12px Arial';
+  ctx.fillText('IMPORTANT NOTICE', 55, y+18);
+  ctx.font = '12px Arial';
+  ctx.fillStyle = '#555';
+  ctx.fillText(`Your current rate schedule is ${d.rateSchedule}. Contact us to review rate options available for your account.`, 55, y+35);
+  ctx.fillText(`Late payment after ${d.dueDate} may result in additional charges.`, 55, y+50);
+
+  y += 75;
+
+  // Footer
+  ctx.strokeStyle = '#e0e0e0'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(40,y); ctx.lineTo(w-40,y); ctx.stroke();
+  y += 20;
+  ctx.fillStyle = '#999';
+  ctx.font = '11px Arial';
+  ctx.fillText(`${ut.name} | Customer Service: 1-800-${Math.floor(100+Math.random()*900)}-${Math.floor(1000+Math.random()*9000)} | Account: ${d.accountNumber}`, 40, y);
+  ctx.fillText(`This bill is generated for demonstration purposes. GridAudit — Utility Bill Intelligence Platform`, 40, y+18);
 }
 
 // ── STEP NAVIGATION ───────────────────────────────────────────
-function goToStep2() {
-  if (!selectedFile) { showToast('Please upload a utility bill first'); return; }
+function goToStep2(skipFileCheck) {
+  if (!skipFileCheck && !selectedFile) { showToast('Please upload a utility bill first'); return; }
   document.getElementById('uploadStep1').style.display = 'none';
   document.getElementById('uploadStep2').style.display = 'block';
   document.getElementById('pill1').classList.remove('active');
