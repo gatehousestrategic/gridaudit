@@ -353,7 +353,7 @@
       </div>
       <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:40px;">
         <button class="btn btn-primary btn-lg" onclick="document.getElementById('uploadCard').scrollIntoView({behavior:'smooth'})">Upload your bill →</button>
-        <button onclick="showPage('demo')" style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.3);color:white;padding:14px 28px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.2s;letter-spacing:-0.2px;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+        <button onclick="runDemo()" style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.3);color:white;padding:14px 28px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.2s;letter-spacing:-0.2px;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
           <span style="font-size:16px;">▶</span> Watch a live demo
         </button>
       </div>
@@ -1165,14 +1165,15 @@ function runDemo() {
 
   showPage('demo');
 
-  // Render after page is visible
+  // Render after page is visible — canvas won't draw to hidden elements
   setTimeout(() => {
     const canvas = document.getElementById('demoBillCanvas');
     canvas.width = 816;
     canvas.height = 1056;
-    const ctx = canvas.getContext('2d');
-    renderBillToCanvas(ctx, demo);
-  }, 50);
+    renderBillToCanvas(canvas.getContext('2d'), demo);
+    canvas.style.width = '100%';
+    canvas.style.height = 'auto';
+  }, 100);
 
   document.getElementById('demoFacilityInfo').innerHTML =
     `<strong>${demo.facilityName}</strong> &nbsp;·&nbsp; ${demo.facilityType} &nbsp;·&nbsp; ${demo.state} &nbsp;·&nbsp; ${demo.utility.name} &nbsp;·&nbsp; ${demo.utilityType}`;
