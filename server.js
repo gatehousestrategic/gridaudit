@@ -39,6 +39,19 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// ── ADMIN AUTH ────────────────────────────────────────────────
+app.post('/api/admin-auth', (req, res) => {
+  const { password } = req.body;
+  if (!process.env.ADMIN_PASSWORD) {
+    return res.status(500).json({ ok: false, error: 'ADMIN_PASSWORD not configured' });
+  }
+  if (password === process.env.ADMIN_PASSWORD) {
+    res.json({ ok: true });
+  } else {
+    res.json({ ok: false });
+  }
+});
+
 // ── RATE LOOKUP ───────────────────────────────────────────────
 app.get('/api/counties/:stateCode', async (req, res) => {
   if (!supabaseAnon) return res.json({ counties: [] });

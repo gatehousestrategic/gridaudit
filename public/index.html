@@ -1133,6 +1133,24 @@
   </div>
 </div>
 
+<!-- ADMIN PASSWORD MODAL -->
+<div class="modal-bg" id="adminAuthModal">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-header">
+      <div class="modal-title">Admin access</div>
+      <button class="modal-close" onclick="document.getElementById('adminAuthModal').classList.remove('show')">×</button>
+    </div>
+    <div class="error-msg" id="adminAuthError"></div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <label>Password</label>
+        <input type="password" id="adminPassword" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')checkAdminPassword()" />
+      </div>
+      <button class="btn btn-primary btn-lg" style="width:100%;" onclick="checkAdminPassword()">Enter →</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1750,11 +1768,10 @@ function showAuthError(msg) {
 
 function updateNav(loggedIn) {
   const nav = document.getElementById('navActions');
-  const isAdmin = currentUser && ADMIN_EMAILS.includes(currentUser.email);
   if (loggedIn) {
     nav.innerHTML = `
       <button class="btn btn-ghost" onclick="showPage('faq')">FAQ</button>
-      ${isAdmin ? '<button class="btn btn-ghost" onclick="goToAdmin()">Admin</button>' : ''}
+      <button class="btn btn-ghost" onclick="goToAdmin()">Admin</button>
       <button class="btn btn-ghost" onclick="showPage('dashboard')">Dashboard</button>
       <button class="btn btn-ghost" onclick="logout()">Log out</button>`;
   } else {
@@ -1837,14 +1854,49 @@ function showToast(msg) {
 }
 
 // ── ADMIN ─────────────────────────────────────────────────────
-const ADMIN_EMAILS = ['admin@gatehousestrategic.com']; // add your email here
+const ADMIN_EMAILS = []; // no longer used — admin is password protected
 
 async function goToAdmin() {
   if (!currentUser) { showToast('Not logged in'); return; }
-  if (!ADMIN_EMAILS.includes(currentUser.email)) { showToast('Not authorized'); return; }
-  showPage('admin');
-  await adminLoadStats();
-  await adminLoadTab('users');
+  // Show password modal
+  document.getElementById('adminPassword').value = '';
+  document.getElementById('adminAuthError').classList.remove('show');
+  document.getElementById('adminAuthModal').classList.add('show');
+  setTimeout(() => document.getElementById('adminPassword').focus(), 100);
+}
+
+async function checkAdminPassword() {
+  const password = document.getElementById('adminPassword').value;
+  if (!password) return;
+
+  const btn = event?.target;
+  if (btn) { btn.disabled = true; btn.textContent = 'Checking...'; }
+
+  try {
+    const res = await fetch('/api/admin-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
+    const data = await res.json();
+
+    if (data.ok) {
+      document.getElementById('adminAuthModal').classList.remove('show');
+      showPage('admin');
+      await adminLoadStats();
+      await adminLoadTab('users');
+    } else {
+      const err = document.getElementById('adminAuthError');
+      err.textContent = 'Incorrect password';
+      err.classList.add('show');
+    }
+  } catch(e) {
+    const err = document.getElementById('adminAuthError');
+    err.textContent = 'Error checking password';
+    err.classList.add('show');
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Enter →'; }
 }
 
 async function adminLoadStats() {
