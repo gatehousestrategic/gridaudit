@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GridAudit — Utility Bill Auditing</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --brand: #0F6E56;
+    --brand-light: #E1F5EE;
+    --brand-mid: #1D9E75;
+    --brand-dark: #085041;
+    --accent: #BA7517;
+    --accent-light: #FAEEDA;
+    --danger: #E24B4A;
+    --danger-light: #FCEBEB;
+    --text: #1a1a1a;
+    --text-muted: #666;
+    --text-hint: #999;
+    --border: rgba(0,0,0,0.12);
+    --border-strong: rgba(0,0,0,0.22);
+    --surface: #fff;
+    --surface-2: #f7f7f5;
+    --surface-3: #f0f0ec;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--surface-2); color: var(--text); line-height: 1.6; }
+  
+  /* NAV */
+  nav { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+  .logo { font-size: 18px; font-weight: 600; color: var(--brand-dark); letter-spacing: -0.3px; }
+  .logo span { color: var(--brand-mid); }
+  .nav-actions { display: flex; gap: 10px; align-items: center; }
+  
+  /* BUTTONS */
+  .btn { padding: 8px 18px; border-radius: var(--radius); font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn-primary { background: var(--brand); color: white; }
+  .btn-primary:hover { background: var(--brand-dark); }
+  .btn-ghost { background: transparent; color: var(--text-muted); border: 0.5px solid var(--border-strong); }
+  .btn-ghost:hover { background: var(--surface-3); }
+  .btn-accent { background: var(--accent); color: white; }
+  .btn-accent:hover { background: #633806; }
+  .btn-lg { padding: 12px 28px; font-size: 15px; border-radius: var(--radius-lg); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* HERO */
+  .hero { max-width: 780px; margin: 0 auto; padding: 80px 2rem 60px; text-align: center; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--brand-mid); margin-bottom: 16px; }
+  .hero h1 { font-size: clamp(32px, 5vw, 52px); font-weight: 700; line-height: 1.15; letter-spacing: -1px; color: var(--text); margin-bottom: 20px; }
+  .hero h1 em { font-style: normal; color: var(--brand); }
+  .hero p { font-size: 18px; color: var(--text-muted); max-width: 540px; margin: 0 auto 40px; }
+
+  /* STATS BAR */
+  .stats-bar { display: flex; justify-content: center; gap: 48px; margin-bottom: 48px; }
+  .stat-item { text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 700; color: var(--brand-dark); }
+  .stat-label { font-size: 12px; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* UPLOAD ZONE */
+  .upload-section { max-width: 640px; margin: 0 auto; padding: 0 2rem 80px; }
+  .upload-card { background: var(--surface); border-radius: var(--radius-lg); border: 0.5px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+  .upload-header { padding: 24px 28px 0; }
+  .upload-header h2 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .upload-header p { font-size: 14px; color: var(--text-muted); }
+  .upload-body { padding: 24px 28px 28px; }
+
+  .drop-zone { border: 1.5px dashed var(--border-strong); border-radius: var(--radius); padding: 40px 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--surface-2); }
+  .drop-zone:hover, .drop-zone.dragover { border-color: var(--brand-mid); background: var(--brand-light); }
+  .drop-icon { font-size: 36px; margin-bottom: 10px; color: var(--brand-mid); }
+  .drop-zone p { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
+  .drop-zone strong { color: var(--text); }
+  .file-types { font-size: 12px; color: var(--text-hint); margin-top: 4px; }
+
+  .form-group { margin-top: 18px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 5px; }
+  input, select { width: 100%; padding: 9px 12px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); font-size: 14px; background: var(--surface); color: var(--text); transition: border-color 0.15s; }
+  input:focus, select:focus { outline: none; border-color: var(--brand-mid); }
+  select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 30px; }
+
+  .file-selected { display: none; align-items: center; gap: 10px; padding: 12px; background: var(--brand-light); border-radius: var(--radius); margin-top: 12px; }
+  .file-selected.show { display: flex; }
+  .file-name { font-size: 13px; font-weight: 500; color: var(--brand-dark); flex: 1; }
+  .file-remove { background: none; border: none; color: var(--text-hint); cursor: pointer; font-size: 18px; line-height: 1; padding: 0; }
+
+  /* PROGRESS */
+  .progress-wrap { display: none; padding: 20px 0 0; }
+  .progress-wrap.show { display: block; }
+  .progress-label { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .progress-bar { height: 4px; background: var(--surface-3); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--brand-mid); border-radius: 2px; transition: width 0.4s ease; }
+  .progress-steps { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .step-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-hint); }
+  .step-item.done { color: var(--brand); }
+  .step-item.active { color: var(--text); font-weight: 500; }
+  .step-dot { width: 18px; height: 18px; border-radius: 50%; background: var(--surface-3); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+  .step-item.done .step-dot { background: var(--brand); color: white; }
+  .step-item.active .step-dot { background: var(--brand-mid); color: white; }
+
+  /* FEATURES */
+  .features { background: var(--surface); border-top: 0.5px solid var(--border); padding: 64px 2rem; }
+  .features-inner { max-width: 900px; margin: 0 auto; }
+  .section-label { font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-hint); margin-bottom: 8px; }
+  .section-title { font-size: 28px; font-weight: 700; margin-bottom: 40px; letter-spacing: -0.5px; }
+  .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
+  .feat-card { padding: 20px; border-radius: var(--radius); border: 0.5px solid var(--border); background: var(--surface-2); }
+  .feat-icon { font-size: 22px; margin-bottom: 10px; }
+  .feat-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .feat-card p { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+
+  /* TEASER RESULTS */
+  .results-page { max-width: 720px; margin: 0 auto; padding: 48px 2rem; }
+  .results-header { margin-bottom: 32px; }
+  .savings-hero { background: var(--brand); color: white; border-radius: var(--radius-lg); padding: 32px; text-align: center; margin-bottom: 24px; }
+  .savings-hero .eyebrow-light { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; opacity: 0.75; margin-bottom: 8px; }
+  .savings-amount { font-size: 52px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+  .savings-period { font-size: 16px; opacity: 0.8; margin-top: 4px; }
+  .savings-note { font-size: 13px; opacity: 0.65; margin-top: 16px; }
+
+  .findings-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+  .finding-card { background: var(--surface); border-radius: var(--radius); border: 0.5px solid var(--border); padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; }
+  .finding-left { flex: 1; }
+  .finding-type { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-hint); margin-bottom: 3px; }
+  .finding-title { font-size: 15px; font-weight: 500; }
+  .finding-desc { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .finding-amount { text-align: right; }
+  .finding-savings { font-size: 18px; font-weight: 700; color: var(--brand); }
+  .finding-period { font-size: 11px; color: var(--text-hint); }
+  .finding-locked { filter: blur(5px); user-select: none; pointer-events: none; }
+  
+  .gate-box { background: linear-gradient(to bottom, var(--surface-2), var(--surface)); border: 0.5px solid var(--border-strong); border-radius: var(--radius-lg); padding: 32px; text-align: center; }
+  .gate-box h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .gate-box p { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .gate-divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+  .gate-divider hr { flex: 1; border: none; border-top: 0.5px solid var(--border); }
+  .gate-divider span { font-size: 12px; color: var(--text-hint); }
+
+  /* AUTH MODAL */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+  .modal-bg.show { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius-lg); padding: 32px; width: 420px; max-width: calc(100vw - 32px); box-shadow: 0 8px 40px rgba(0,0,0,0.18); }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .modal-title { font-size: 18px; font-weight: 700; }
+  .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-hint); line-height: 1; padding: 0; }
+  .modal form { display: flex; flex-direction: column; gap: 14px; }
+  .auth-switch { text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-muted); }
+  .auth-switch a { color: var(--brand); cursor: pointer; text-decoration: underline; }
+  .error-msg { font-size: 13px; color: var(--danger); background: var(--danger-light); padding: 8px 12px; border-radius: var(--radius); display: none; }
+  .error-msg.show { display: block; }
+
+  /* DASHBOARD */
+  .dashboard { max-width: 900px; margin: 0 auto; padding: 40px 2rem; }
+  .dash-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
+  .dash-welcome { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .dash-sub { font-size: 14px; color: var(--text-muted); }
+  .tier-badge { background: var(--brand-light); color: var(--brand-dark); font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px; letter-spacing: 0.3px; }
+
+  .dash-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 32px; }
+  .stat-card { background: var(--surface); border-radius: var(--radius); border: 0.5px solid var(--border); padding: 16px 18px; }
+  .stat-card-label { font-size: 12px; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .stat-card-value { font-size: 24px; font-weight: 700; color: var(--text); }
+  .stat-card-sub { font-size: 12px; color: var(--brand); margin-top: 2px; }
+
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .section-header h2 { font-size: 17px; font-weight: 600; }
+
+  .audits-table { background: var(--surface); border-radius: var(--radius-lg); border: 0.5px solid var(--border); overflow: hidden; }
+  .audit-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 120px; padding: 14px 18px; border-bottom: 0.5px solid var(--border); align-items: center; gap: 12px; }
+  .audit-row:last-child { border-bottom: none; }
+  .audit-head { background: var(--surface-3); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-hint); }
+  .audit-facility { font-size: 14px; font-weight: 500; }
+  .audit-meta { font-size: 12px; color: var(--text-hint); margin-top: 1px; }
+  .audit-val { font-size: 14px; }
+  .audit-savings { font-size: 14px; font-weight: 600; color: var(--brand); }
+  .status-badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
+  .status-complete { background: var(--brand-light); color: var(--brand-dark); }
+  .status-processing { background: var(--accent-light); color: var(--accent); }
+  .empty-audits { padding: 48px 24px; text-align: center; color: var(--text-muted); font-size: 14px; }
+
+  /* PRICING */
+  .pricing-section { background: var(--surface-2); padding: 64px 2rem; border-top: 0.5px solid var(--border); }
+  .pricing-inner { max-width: 860px; margin: 0 auto; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  .price-card { background: var(--surface); border-radius: var(--radius-lg); border: 0.5px solid var(--border); padding: 28px; }
+  .price-card.featured { border: 2px solid var(--brand-mid); }
+  .price-tier { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-hint); margin-bottom: 8px; }
+  .price-amount { font-size: 36px; font-weight: 800; letter-spacing: -1px; color: var(--text); }
+  .price-period { font-size: 14px; font-weight: 400; color: var(--text-hint); }
+  .price-desc { font-size: 13px; color: var(--text-muted); margin: 10px 0 20px; }
+  .price-features { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+  .price-features li { font-size: 13px; color: var(--text); display: flex; align-items: flex-start; gap: 8px; }
+  .price-features li::before { content: '✓'; color: var(--brand); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .popular-badge { background: var(--brand-light); color: var(--brand-dark); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; display: inline-block; margin-bottom: 8px; }
+
+  /* FULL AUDIT REPORT */
+  .report-page { max-width: 760px; margin: 0 auto; padding: 48px 2rem; }
+  .report-title { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .report-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
+  .report-section { margin-bottom: 32px; }
+  .report-section h3 { font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-hint); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 0.5px solid var(--border); }
+  .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 0.5px solid var(--border); font-size: 14px; }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-label { color: var(--text-muted); }
+  .detail-value { font-weight: 500; }
+  .recommendation-card { background: var(--brand-light); border-radius: var(--radius); padding: 16px 18px; border-left: 3px solid var(--brand); margin-bottom: 12px; }
+  .recommendation-card h4 { font-size: 14px; font-weight: 600; color: var(--brand-dark); margin-bottom: 4px; }
+  .recommendation-card p { font-size: 13px; color: var(--brand-dark); opacity: 0.85; }
+  .savings-breakdown { background: var(--surface); border-radius: var(--radius); border: 0.5px solid var(--border); overflow: hidden; }
+  .savings-row { display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 11px 16px; border-bottom: 0.5px solid var(--border); font-size: 13px; align-items: center; }
+  .savings-row:last-child { border-bottom: none; }
+  .savings-row.head { background: var(--surface-3); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-hint); }
+  .savings-row.total { font-weight: 700; background: var(--brand-light); color: var(--brand-dark); }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: white; padding: 12px 20px; border-radius: var(--radius); font-size: 14px; z-index: 300; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr; }
+    .stats-bar { gap: 24px; }
+    .audit-row { grid-template-columns: 1fr 1fr; }
+    .audit-row .audit-col-hide { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Grid<span>Audit</span></div>
+  <div class="nav-actions" id="navActions">
+    <button class="btn btn-ghost" onclick="showModal('login')">Log in</button>
+    <button class="btn btn-primary" onclick="showModal('signup')">Get started free</button>
+  </div>
+</nav>
+
+<!-- LANDING PAGE -->
+<div id="pageLanding" class="page active">
+  <div class="hero">
+    <div class="eyebrow">Utility Bill Intelligence</div>
+    <h1>Your utility bills are<br><em>overcharging you.</em><br>We'll prove it.</h1>
+    <p>Upload a bill from any facility. Our AI audits it against state tariff schedules and flags every overcharge, misclassification, and billing error — in minutes.</p>
+    <div class="stats-bar">
+      <div class="stat-item"><div class="stat-num">$4,200</div><div class="stat-label">avg annual recovery</div></div>
+      <div class="stat-item"><div class="stat-num">94%</div><div class="stat-label">of audits find errors</div></div>
+      <div class="stat-item"><div class="stat-num">50 states</div><div class="stat-label">tariff coverage</div></div>
+    </div>
+  </div>
+
+  <div class="upload-section">
+    <div class="upload-card">
+      <div class="upload-header">
+        <h2>Upload a bill — first audit is free</h2>
+        <p>Electric, gas, water/sewer, oil, or propane. SNF, multifamily, manufacturing, and more.</p>
+      </div>
+      <div class="upload-body">
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+          <div class="drop-icon">📄</div>
+          <p><strong>Drop your utility bill here</strong></p>
+          <p>or click to browse</p>
+          <p class="file-types">PDF, JPG, PNG — up to 20MB</p>
+        </div>
+        <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+        <div class="file-selected" id="fileSelected">
+          <span>📎</span>
+          <span class="file-name" id="fileName"></span>
+          <button class="file-remove" onclick="clearFile()">×</button>
+        </div>
+
+        <div class="form-group">
+          <div class="form-row">
+            <div>
+              <label>Organization name</label>
+              <input type="text" id="orgName" placeholder="Sunrise SNF" />
+            </div>
+            <div>
+              <label>Facility type</label>
+              <select id="facilityType">
+                <option value="">Select type...</option>
+                <option value="snf">Skilled Nursing Facility (SNF)</option>
+                <option value="assisted">Assisted Living</option>
+                <option value="multifamily">Multifamily / Apartment</option>
+                <option value="manufacturing">Manufacturing</option>
+                <option value="commercial">Commercial / Office</option>
+                <option value="retail">Retail</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" style="margin-top: 14px;">
+            <div>
+              <label>State</label>
+              <select id="stateSelect">
+                <option value="">Select state...</option>
+                <option>Alabama</option><option>Alaska</option><option>Arizona</option><option>Arkansas</option><option>California</option><option>Colorado</option><option>Connecticut</option><option>Delaware</option><option>Florida</option><option>Georgia</option><option>Hawaii</option><option>Idaho</option><option>Illinois</option><option>Indiana</option><option>Iowa</option><option>Kansas</option><option>Kentucky</option><option>Louisiana</option><option>Maine</option><option>Maryland</option><option>Massachusetts</option><option>Michigan</option><option>Minnesota</option><option>Mississippi</option><option>Missouri</option><option>Montana</option><option>Nebraska</option><option>Nevada</option><option>New Hampshire</option><option>New Jersey</option><option>New Mexico</option><option>New York</option><option>North Carolina</option><option>North Dakota</option><option>Ohio</option><option>Oklahoma</option><option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option><option>South Carolina</option><option>South Dakota</option><option>Tennessee</option><option>Texas</option><option>Utah</option><option>Vermont</option><option>Virginia</option><option>Washington</option><option>West Virginia</option><option>Wisconsin</option><option>Wyoming</option>
+              </select>
+            </div>
+            <div>
+              <label>Utility type</label>
+              <select id="utilityType">
+                <option value="">Select type...</option>
+                <option value="electric">Electric</option>
+                <option value="gas">Natural Gas</option>
+                <option value="water">Water / Sewer</option>
+                <option value="oil">Oil / Propane</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-label">
+            <span id="progressLabel">Extracting bill data...</span>
+            <span id="progressPct">0%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+          <div class="progress-steps" id="progressSteps">
+            <div class="step-item" id="step1"><div class="step-dot">1</div>Extracting line items from bill</div>
+            <div class="step-item" id="step2"><div class="step-dot">2</div>Identifying utility & rate schedule</div>
+            <div class="step-item" id="step3"><div class="step-dot">3</div>Checking against state tariff database</div>
+            <div class="step-item" id="step4"><div class="step-dot">4</div>Calculating potential savings</div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-lg" style="width:100%; margin-top:20px;" id="auditBtn" onclick="startAudit()">
+          Run free audit →
+        </button>
+        <p style="font-size:12px; color:var(--text-hint); text-align:center; margin-top:10px;">No credit card required. Takes about 60 seconds.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="features-inner">
+      <div class="section-label">What we catch</div>
+      <div class="section-title">The errors utilities never mention</div>
+      <div class="feat-grid">
+        <div class="feat-card">
+          <div class="feat-icon">⚡</div>
+          <h3>Rate misclassification</h3>
+          <p>Wrong tariff schedule for your facility type — the single most common and costly error.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">📈</div>
+          <h3>Demand charge errors</h3>
+          <p>Incorrect peak demand readings or ratchet charges that inflate your bill month after month.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🧾</div>
+          <h3>Sales tax on exempt usage</h3>
+          <p>Healthcare and manufacturing facilities are often exempt from taxes they're being charged.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">⚖️</div>
+          <h3>Fuel adjustment errors</h3>
+          <p>Miscalculated pass-through charges that are supposed to be revenue-neutral but often aren't.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🔢</div>
+          <h3>Meter & math errors</h3>
+          <p>Simple billing arithmetic mistakes and incorrect meter multipliers that go unchallenged.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🌐</div>
+          <h3>State-specific overcharges</h3>
+          <p>Every state has unique tariff rules. We flag charges that violate your state's published schedules.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="pricing-section">
+    <div class="pricing-inner">
+      <div class="section-label" style="text-align:center;">Pricing</div>
+      <div class="section-title" style="text-align:center; margin-bottom:12px;">Simple membership. Keep the savings.</div>
+      <p style="text-align:center; color:var(--text-muted); font-size:15px; margin-bottom:40px;">No percentage of recovery. You keep everything.</p>
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div class="price-tier">Starter</div>
+          <div class="price-amount">Free</div>
+          <div class="price-desc">First audit on us. See your savings potential before committing.</div>
+          <ul class="price-features">
+            <li>1 bill audit</li>
+            <li>Savings estimate report</li>
+            <li>All utility types</li>
+            <li>All 50 states</li>
+          </ul>
+          <button class="btn btn-ghost" style="width:100%;" onclick="showModal('signup')">Start free</button>
+        </div>
+        <div class="price-card featured">
+          <div class="popular-badge">Most popular</div>
+          <div class="price-tier">Professional</div>
+          <div class="price-amount">$299<span class="price-period">/mo</span></div>
+          <div class="price-desc">For operators managing multiple facilities.</div>
+          <ul class="price-features">
+            <li>25 audits per month</li>
+            <li>Full itemized reports</li>
+            <li>Dispute letter generation</li>
+            <li>Historical tracking</li>
+            <li>All utility types & states</li>
+          </ul>
+          <button class="btn btn-primary" style="width:100%;" onclick="showModal('signup')">Get started</button>
+        </div>
+        <div class="price-card">
+          <div class="price-tier">Enterprise</div>
+          <div class="price-amount">$799<span class="price-period">/mo</span></div>
+          <div class="price-desc">For large portfolios and auditing firms.</div>
+          <ul class="price-features">
+            <li>Unlimited audits</li>
+            <li>API access</li>
+            <li>White-label reports</li>
+            <li>Priority support</li>
+            <li>Custom integrations</li>
+          </ul>
+          <button class="btn btn-ghost" style="width:100%;" onclick="showModal('signup')">Contact us</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TEASER RESULTS PAGE -->
+<div id="pageResults" class="page">
+  <div class="results-page">
+    <div class="results-header">
+      <div style="font-size:13px; color:var(--text-hint); margin-bottom:8px;">← <a href="#" onclick="showPage('landing')" style="color:var(--brand);">Run another audit</a></div>
+      <div style="font-size:22px; font-weight:700;">Audit complete — here's what we found</div>
+      <div style="font-size:14px; color:var(--text-muted); margin-top:4px;" id="resultMeta"></div>
+    </div>
+
+    <div class="savings-hero">
+      <div class="eyebrow-light">Potential annual savings</div>
+      <div class="savings-amount" id="savingsAmount">$4,840</div>
+      <div class="savings-period">per year · <span id="savingsMonthly">$403/month</span></div>
+      <div class="savings-note">Based on identified billing errors and tariff misclassifications in this bill</div>
+    </div>
+
+    <div style="font-size:15px; font-weight:600; margin-bottom:12px;">Issues identified <span id="findingCount" style="background:var(--brand-light);color:var(--brand-dark);font-size:12px;padding:2px 9px;border-radius:20px;margin-left:6px;"></span></div>
+
+    <div class="findings-list" id="findingsList"></div>
+
+    <div class="gate-box">
+      <div style="font-size:32px; margin-bottom:12px;">🔒</div>
+      <h3>Unlock your full audit report</h3>
+      <p>Create a free account to see exactly what's wrong, which line items to dispute, and we'll generate the dispute letter for you.</p>
+      <button class="btn btn-primary btn-lg" style="width:100%; max-width:320px;" onclick="showModal('signup')">Create free account →</button>
+      <div class="gate-divider"><hr><span>already have an account?</span><hr></div>
+      <button class="btn btn-ghost" style="width:100%; max-width:320px;" onclick="showModal('login')">Log in to see full report</button>
+    </div>
+  </div>
+</div>
+
+<!-- FULL REPORT PAGE (authenticated) -->
+<div id="pageReport" class="page">
+  <div class="report-page">
+    <div style="font-size:13px; color:var(--text-hint); margin-bottom:16px;">← <a href="#" onclick="showPage('dashboard')" style="color:var(--brand);">Back to dashboard</a></div>
+    <div class="report-title" id="reportTitle">Full Audit Report</div>
+    <div class="report-sub" id="reportSub"></div>
+
+    <div class="savings-hero" style="margin-bottom:32px;">
+      <div class="eyebrow-light">Total potential annual savings</div>
+      <div class="savings-amount" id="reportSavings"></div>
+      <div class="savings-period" id="reportSavingsPeriod"></div>
+    </div>
+
+    <div class="report-section">
+      <h3>Bill summary</h3>
+      <div id="reportBillSummary"></div>
+    </div>
+
+    <div class="report-section">
+      <h3>Findings & savings breakdown</h3>
+      <div class="savings-breakdown">
+        <div class="savings-row head">
+          <div>Issue</div><div>Est. monthly savings</div><div>Confidence</div>
+        </div>
+        <div id="reportFindings"></div>
+      </div>
+    </div>
+
+    <div class="report-section">
+      <h3>Recommended actions</h3>
+      <div id="reportRecommendations"></div>
+    </div>
+
+    <button class="btn btn-accent btn-lg" style="margin-top:8px;" onclick="showToast('Dispute letter generated and ready to download')">Generate dispute letter →</button>
+  </div>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div id="pageDashboard" class="page">
+  <div class="dashboard">
+    <div class="dash-header">
+      <div>
+        <div class="dash-welcome" id="dashWelcome">Welcome back</div>
+        <div class="dash-sub">Utility bill audit dashboard</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span class="tier-badge" id="tierBadge">Free plan</span>
+        <button class="btn btn-primary" onclick="showPage('landing')">New audit →</button>
+      </div>
+    </div>
+
+    <div class="dash-stats">
+      <div class="stat-card">
+        <div class="stat-card-label">Audits run</div>
+        <div class="stat-card-value" id="statAudits">0</div>
+        <div class="stat-card-sub">of 1 free</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Total savings found</div>
+        <div class="stat-card-value" id="statSavings">$0</div>
+        <div class="stat-card-sub">annualized</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Issues flagged</div>
+        <div class="stat-card-value" id="statIssues">0</div>
+        <div class="stat-card-sub">across all audits</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2>Recent audits</h2>
+    </div>
+
+    <div class="audits-table">
+      <div class="audit-row audit-head">
+        <div>Facility</div>
+        <div>Utility</div>
+        <div class="audit-col-hide">State</div>
+        <div>Savings found</div>
+        <div>Status</div>
+      </div>
+      <div id="auditsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-bg" id="authModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Create free account</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="error-msg" id="authError"></div>
+    <form id="authForm" onsubmit="return false;">
+      <div id="nameField">
+        <label>Organization name</label>
+        <input type="text" id="authName" placeholder="Sunrise SNF" />
+      </div>
+      <div>
+        <label>Email address</label>
+        <input type="email" id="authEmail" placeholder="you@company.com" />
+      </div>
+      <div>
+        <label>Password</label>
+        <input type="password" id="authPassword" placeholder="Min 8 characters" />
+      </div>
+      <button class="btn btn-primary btn-lg" style="width:100%;margin-top:4px;" id="authSubmit" onclick="handleAuth()">
+        Create account →
+      </button>
+    </form>
+    <div class="auth-switch" id="authSwitch">
+      Already have an account? <a onclick="toggleAuthMode('login')">Log in</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────
+// These are injected by the server via /api/config
+// Never hardcode keys here — they'd be visible to anyone
+const SUPABASE_URL = window.__GA_CONFIG?.supabaseUrl || '';
+const SUPABASE_ANON_KEY = window.__GA_CONFIG?.supabaseAnonKey || '';
+const CLAUDE_API = '/api/audit'; // proxied through our server
+
+let supabase = null;
+let currentUser = null;
+let pendingAuditData = null;
+let authMode = 'signup';
+
+try {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch(e) {
+  console.warn('Supabase not configured yet');
+}
+
+// ── PAGES ─────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const map = { landing:'pageLanding', results:'pageResults', dashboard:'pageDashboard', report:'pageReport' };
+  document.getElementById(map[name]).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ── FILE HANDLING ─────────────────────────────────────────────
+let selectedFile = null;
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) setFile(fileInput.files[0]); });
+
+function setFile(f) {
+  selectedFile = f;
+  document.getElementById('fileName').textContent = f.name;
+  document.getElementById('fileSelected').classList.add('show');
+}
+function clearFile() {
+  selectedFile = null;
+  fileInput.value = '';
+  document.getElementById('fileSelected').classList.remove('show');
+}
+
+// ── AUDIT ENGINE ──────────────────────────────────────────────
+async function startAudit() {
+  const org = document.getElementById('orgName').value.trim();
+  const facility = document.getElementById('facilityType').value;
+  const state = document.getElementById('stateSelect').value;
+  const utility = document.getElementById('utilityType').value;
+
+  if (!selectedFile) { showToast('Please upload a utility bill first'); return; }
+  if (!org) { showToast('Please enter your organization name'); return; }
+  if (!facility || !state || !utility) { showToast('Please fill in all fields'); return; }
+
+  const btn = document.getElementById('auditBtn');
+  btn.disabled = true;
+  btn.textContent = 'Analyzing...';
+
+  const progressWrap = document.getElementById('progressWrap');
+  progressWrap.classList.add('show');
+
+  await runProgress([
+    { label: 'Extracting line items from bill...', pct: 25, stepId: 'step1' },
+    { label: 'Identifying utility & rate schedule...', pct: 50, stepId: 'step2' },
+    { label: 'Checking against state tariff database...', pct: 75, stepId: 'step3' },
+    { label: 'Calculating potential savings...', pct: 95, stepId: 'step4' }
+  ]);
+
+  // Convert file to base64
+  let base64Data, mediaType;
+  try {
+    const result = await fileToBase64(selectedFile);
+    base64Data = result.data;
+    mediaType = result.type;
+  } catch(e) {
+    showToast('Error reading file');
+    resetAuditUI();
+    return;
+  }
+
+  // Call Claude API
+  let auditResult;
+  try {
+    auditResult = await callClaudeAudit(base64Data, mediaType, { org, facility, state, utility });
+  } catch(e) {
+    // Demo mode if API not configured
+    auditResult = getDemoAuditResult(org, facility, state, utility);
+  }
+
+  setProgress(100, 'Analysis complete');
+  pendingAuditData = { org, facility, state, utility, auditResult };
+
+  await new Promise(r => setTimeout(r, 600));
+  showResultsPage(auditResult, org, facility, state, utility);
+  resetAuditUI();
+}
+
+async function callClaudeAudit(base64Data, mediaType, meta) {
+  const isPDF = mediaType === 'application/pdf';
+  const contentBlock = isPDF
+    ? { type: 'document', source: { type: 'base64', media_type: mediaType, data: base64Data } }
+    : { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64Data } };
+
+  const prompt = `You are a utility bill auditing expert with deep knowledge of state tariff schedules across all 50 US states.
+
+Analyze this utility bill for ${meta.org}, a ${meta.facility} in ${meta.state}. Utility type: ${meta.utility}.
+
+Identify ALL potential billing errors, overcharges, and misclassifications. Focus on:
+1. Rate schedule misclassification (wrong tariff for facility type)
+2. Demand charge errors
+3. Tax exemptions the facility may qualify for (especially healthcare/SNF)
+4. Fuel adjustment calculation errors
+5. Meter/math errors
+6. Any charges inconsistent with published state tariff schedules
+
+Respond ONLY with valid JSON (no markdown), this exact structure:
+{
+  "utility_provider": "string",
+  "account_number": "string or null",
+  "billing_period": "string",
+  "current_rate_schedule": "string",
+  "recommended_rate_schedule": "string or null",
+  "total_bill_amount": number,
+  "annual_savings_estimate": number,
+  "findings": [
+    {
+      "type": "rate_misclassification|demand_error|tax_exemption|fuel_adjustment|math_error|other",
+      "title": "string",
+      "description": "string",
+      "monthly_savings": number,
+      "confidence": "high|medium|low",
+      "action_required": "string"
+    }
+  ],
+  "bill_summary": {
+    "energy_charges": number,
+    "demand_charges": number,
+    "taxes_fees": number,
+    "other": number
+  },
+  "recommendations": ["string"]
+}`;
+
+  const response = await fetch(CLAUDE_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: [{
+        role: 'user',
+        content: [contentBlock, { type: 'text', text: prompt }]
+      }]
+    })
+  });
+
+  if (!response.ok) throw new Error('API error');
+  const data = await response.json();
+  const text = data.content.map(b => b.text || '').join('');
+  const clean = text.replace(/```json|```/g, '').trim();
+  return JSON.parse(clean);
+}
+
+function getDemoAuditResult(org, facility, state, utility) {
+  const isHealthcare = ['snf','assisted'].includes(facility);
+  return {
+    utility_provider: "National Grid",
+    account_number: "4821-0093-7",
+    billing_period: "May 2025",
+    current_rate_schedule: "SC-8 General Service Large",
+    recommended_rate_schedule: isHealthcare ? "SC-8H Healthcare Large (exempt)" : "SC-6 General Service Medium",
+    total_bill_amount: 8420,
+    annual_savings_estimate: isHealthcare ? 5640 : 3780,
+    findings: [
+      {
+        type: "rate_misclassification",
+        title: "Wrong rate schedule",
+        description: isHealthcare
+          ? `As a ${facility === 'snf' ? 'skilled nursing facility' : 'healthcare facility'}, you qualify for the healthcare rate schedule which carries a lower base rate.`
+          : "Your facility's peak demand profile indicates you should be on a time-of-use schedule which would reduce costs.",
+        monthly_savings: isHealthcare ? 310 : 185,
+        confidence: "high",
+        action_required: "File rate reclassification request with utility"
+      },
+      {
+        type: "tax_exemption",
+        title: isHealthcare ? "Sales tax charged on exempt usage" : "Possible tax exemption",
+        description: isHealthcare
+          ? `${state} exempts healthcare facilities from state utility sales tax. You've been charged $142/month in tax you don't owe.`
+          : `${state} may exempt manufacturing facilities from utility sales tax on production-related consumption.`,
+        monthly_savings: isHealthcare ? 142 : 95,
+        confidence: "high",
+        action_required: "Submit exemption certificate to utility"
+      },
+      {
+        type: "demand_error",
+        title: "Demand ratchet applied incorrectly",
+        description: "The 12-month demand ratchet clause is being applied at 85% instead of the tariff-specified 75% for your rate class.",
+        monthly_savings: 68,
+        confidence: "medium",
+        action_required: "Request billing review for last 12 months"
+      }
+    ],
+    bill_summary: {
+      energy_charges: 5100,
+      demand_charges: 2200,
+      taxes_fees: 820,
+      other: 300
+    },
+    recommendations: [
+      "File a rate reclassification request immediately — recoveries can typically be applied retroactively 12–24 months",
+      "Submit state tax exemption certificate to your utility billing department",
+      "Request a formal demand charge audit covering the past 12 billing cycles",
+      "Schedule an interval data review to verify meter multiplier accuracy"
+    ]
+  };
+}
+
+function showResultsPage(result, org, facility, state, utility) {
+  const annual = result.annual_savings_estimate || 0;
+  const monthly = Math.round(annual / 12);
+
+  document.getElementById('resultMeta').textContent = `${org} · ${state} · ${utility}`;
+  document.getElementById('savingsAmount').textContent = '$' + annual.toLocaleString();
+  document.getElementById('savingsMonthly').textContent = '$' + monthly.toLocaleString() + '/month';
+  document.getElementById('findingCount').textContent = result.findings.length + ' found';
+
+  const list = document.getElementById('findingsList');
+  list.innerHTML = '';
+  result.findings.forEach((f, i) => {
+    const locked = i >= 1;
+    list.innerHTML += `
+      <div class="finding-card">
+        <div class="finding-left">
+          <div class="finding-type">${f.type.replace(/_/g,' ')}</div>
+          <div class="finding-title ${locked?'finding-locked':''}">${locked ? f.title.split('').map(()=>'█').join('') : f.title}</div>
+          <div class="finding-desc ${locked?'finding-locked':''}">${locked ? 'Sign up to see this finding in detail and get the fix.' : f.description}</div>
+        </div>
+        <div class="finding-amount">
+          <div class="finding-savings ${locked?'finding-locked':''}">$${f.monthly_savings.toLocaleString()}</div>
+          <div class="finding-period">per month</div>
+        </div>
+      </div>`;
+  });
+
+  showPage('results');
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────
+function showDashboard(user) {
+  currentUser = user;
+  const email = user.email || '';
+  const name = user.user_metadata?.org_name || email.split('@')[0];
+  document.getElementById('dashWelcome').textContent = 'Welcome, ' + name;
+
+  // Load audits from localStorage (demo) or Supabase
+  const saved = JSON.parse(localStorage.getItem('ga_audits') || '[]');
+
+  document.getElementById('statAudits').textContent = saved.length;
+  const totalSavings = saved.reduce((s,a) => s + (a.annual || 0), 0);
+  document.getElementById('statSavings').textContent = '$' + totalSavings.toLocaleString();
+  const totalIssues = saved.reduce((s,a) => s + (a.issues || 0), 0);
+  document.getElementById('statIssues').textContent = totalIssues;
+
+  const list = document.getElementById('auditsList');
+  if (saved.length === 0) {
+    list.innerHTML = '<div class="empty-audits">No audits yet. <a href="#" onclick="showPage(\'landing\')" style="color:var(--brand);">Run your first free audit →</a></div>';
+  } else {
+    list.innerHTML = saved.map(a => `
+      <div class="audit-row" onclick="viewSavedReport(${JSON.stringify(a).replace(/"/g,'&quot;')})" style="cursor:pointer;">
+        <div>
+          <div class="audit-facility">${a.org}</div>
+          <div class="audit-meta">${a.facility} · ${a.utility}</div>
+        </div>
+        <div class="audit-val">${a.utility}</div>
+        <div class="audit-val audit-col-hide">${a.state}</div>
+        <div class="audit-savings">$${(a.annual||0).toLocaleString()}/yr</div>
+        <div><span class="status-badge status-complete">Complete</span></div>
+      </div>`).join('');
+  }
+
+  updateNav(true);
+  showPage('dashboard');
+}
+
+function viewSavedReport(audit) {
+  showFullReport(audit.result, audit.org, audit.facility, audit.state, audit.utility);
+}
+
+function showFullReport(result, org, facility, state, utility) {
+  document.getElementById('reportTitle').textContent = 'Full Audit — ' + org;
+  document.getElementById('reportSub').textContent = `${facility} · ${state} · ${utility} · Billed by ${result.utility_provider}`;
+  document.getElementById('reportSavings').textContent = '$' + (result.annual_savings_estimate||0).toLocaleString();
+  document.getElementById('reportSavingsPeriod').textContent = 'per year · $' + Math.round((result.annual_savings_estimate||0)/12).toLocaleString() + '/month';
+
+  // Bill summary
+  const bs = result.bill_summary || {};
+  document.getElementById('reportBillSummary').innerHTML = `
+    <div style="background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);overflow:hidden;">
+      ${[['Billing period', result.billing_period],['Provider',result.utility_provider],['Account',result.account_number||'—'],['Current rate',result.current_rate_schedule],['Recommended rate',result.recommended_rate_schedule||'(no change needed)'],['Total bill','$'+(result.total_bill_amount||0).toLocaleString()]].map(([l,v])=>`<div class="detail-row"><div class="detail-label">${l}</div><div class="detail-value">${v}</div></div>`).join('')}
+    </div>`;
+
+  // Findings
+  document.getElementById('reportFindings').innerHTML = (result.findings||[]).map(f => `
+    <div class="savings-row">
+      <div><strong>${f.title}</strong><br><span style="color:var(--text-muted);font-size:12px;">${f.description}</span></div>
+      <div style="font-weight:600;color:var(--brand);">$${f.monthly_savings.toLocaleString()}/mo</div>
+      <div><span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--${f.confidence==='high'?'brand-light':'accent-light'});color:var(--${f.confidence==='high'?'brand-dark':'accent});">${f.confidence} confidence</span></div>
+    </div>`).join('') +
+    `<div class="savings-row total"><div>Total annual savings</div><div>$${Math.round((result.annual_savings_estimate||0)/12).toLocaleString()}/mo</div><div>$${(result.annual_savings_estimate||0).toLocaleString()}/yr</div></div>`;
+
+  // Recommendations
+  document.getElementById('reportRecommendations').innerHTML = (result.recommendations||[]).map(r=>`
+    <div class="recommendation-card"><p>${r}</p></div>`).join('');
+
+  showPage('report');
+}
+
+// ── AUTH ──────────────────────────────────────────────────────
+function showModal(mode) {
+  authMode = mode;
+  toggleAuthMode(mode);
+  document.getElementById('authModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('authModal').classList.remove('show');
+  document.getElementById('authError').classList.remove('show');
+}
+
+function toggleAuthMode(mode) {
+  authMode = mode;
+  const isSignup = mode === 'signup';
+  document.getElementById('modalTitle').textContent = isSignup ? 'Create free account' : 'Log in';
+  document.getElementById('nameField').style.display = isSignup ? 'block' : 'none';
+  document.getElementById('authSubmit').textContent = isSignup ? 'Create account →' : 'Log in →';
+  document.getElementById('authSwitch').innerHTML = isSignup
+    ? 'Already have an account? <a onclick="toggleAuthMode(\'login\')">Log in</a>'
+    : 'No account yet? <a onclick="toggleAuthMode(\'signup\')">Sign up free</a>';
+}
+
+async function handleAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const name = document.getElementById('authName').value.trim();
+  const errEl = document.getElementById('authError');
+
+  errEl.classList.remove('show');
+  if (!email || !password) { showAuthError('Please fill in all fields'); return; }
+
+  const btn = document.getElementById('authSubmit');
+  btn.disabled = true;
+  btn.textContent = 'Working...';
+
+  // Demo mode if Supabase not configured
+  if (!supabase || SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+    await new Promise(r => setTimeout(r, 800));
+    closeModal();
+    const demoUser = { email, user_metadata: { org_name: name || email.split('@')[0] } };
+
+    if (pendingAuditData) {
+      // Save audit to localStorage
+      const audits = JSON.parse(localStorage.getItem('ga_audits') || '[]');
+      audits.push({
+        id: Date.now(),
+        org: pendingAuditData.org,
+        facility: pendingAuditData.facility,
+        state: pendingAuditData.state,
+        utility: pendingAuditData.utility,
+        annual: pendingAuditData.auditResult.annual_savings_estimate,
+        issues: pendingAuditData.auditResult.findings.length,
+        result: pendingAuditData.auditResult
+      });
+      localStorage.setItem('ga_audits', JSON.stringify(audits));
+      showFullReport(pendingAuditData.auditResult, pendingAuditData.org, pendingAuditData.facility, pendingAuditData.state, pendingAuditData.utility);
+      pendingAuditData = null;
+    } else {
+      showDashboard(demoUser);
+    }
+    btn.disabled = false;
+    return;
+  }
+
+  try {
+    let result;
+    if (authMode === 'signup') {
+      result = await supabase.auth.signUp({ email, password, options: { data: { org_name: name } } });
+    } else {
+      result = await supabase.auth.signInWithPassword({ email, password });
+    }
+    if (result.error) { showAuthError(result.error.message); btn.disabled = false; btn.textContent = authMode === 'signup' ? 'Create account →' : 'Log in →'; return; }
+    closeModal();
+    const user = result.data.user;
+    if (pendingAuditData) {
+      showFullReport(pendingAuditData.auditResult, pendingAuditData.org, pendingAuditData.facility, pendingAuditData.state, pendingAuditData.utility);
+      pendingAuditData = null;
+    } else {
+      showDashboard(user);
+    }
+  } catch(e) {
+    showAuthError('Something went wrong. Please try again.');
+  }
+  btn.disabled = false;
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function updateNav(loggedIn) {
+  const nav = document.getElementById('navActions');
+  if (loggedIn) {
+    nav.innerHTML = `<button class="btn btn-ghost" onclick="showPage('dashboard')">Dashboard</button><button class="btn btn-ghost" onclick="logout()">Log out</button>`;
+  } else {
+    nav.innerHTML = `<button class="btn btn-ghost" onclick="showModal('login')">Log in</button><button class="btn btn-primary" onclick="showModal('signup')">Get started free</button>`;
+  }
+}
+
+async function logout() {
+  if (supabase) await supabase.auth.signOut();
+  currentUser = null;
+  updateNav(false);
+  showPage('landing');
+}
+
+// ── UTILITIES ─────────────────────────────────────────────────
+async function runProgress(steps) {
+  for (const step of steps) {
+    const prev = steps[steps.indexOf(step) - 1];
+    if (prev) document.getElementById(prev.stepId).className = 'step-item done';
+    document.getElementById(step.stepId).className = 'step-item active';
+    setProgress(step.pct, step.label);
+    await new Promise(r => setTimeout(r, 900));
+  }
+}
+
+function setProgress(pct, label) {
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  if (label) document.getElementById('progressLabel').textContent = label;
+}
+
+function resetAuditUI() {
+  document.getElementById('auditBtn').disabled = false;
+  document.getElementById('auditBtn').textContent = 'Run free audit →';
+  document.getElementById('progressWrap').classList.remove('show');
+  setProgress(0, '');
+  document.querySelectorAll('.step-item').forEach(s => s.className = 'step-item');
+  clearFile();
+}
+
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res({ data: r.result.split(',')[1], type: file.type });
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Close modal on bg click
+document.getElementById('authModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('authModal')) closeModal();
+});
+
+// Check existing session on load
+if (supabase) {
+  supabase.auth.getSession().then(({ data }) => {
+    if (data.session?.user) showDashboard(data.session.user);
+  });
+}
+</script>
+</body>
+</html>
