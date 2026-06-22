@@ -57,7 +57,7 @@
   /* ── HERO ─────────────────────────────────────────────────── */
   .hero-section {
     background: linear-gradient(160deg, #04342C 0%, #0F6E56 55%, #1D9E75 100%);
-    padding: 72px 2.5rem 100px;
+    padding: 72px 2rem 100px;
     overflow: hidden;
     position: relative;
     width: 100%;
@@ -353,28 +353,10 @@
       </div>
       <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:40px;">
         <button class="btn btn-primary btn-lg" onclick="document.getElementById('uploadCard').scrollIntoView({behavior:'smooth'})">Upload your bill →</button>
-        <button onclick="runDemo()" style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.3);color:white;padding:14px 28px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.2s;letter-spacing:-0.2px;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+        <button onclick="showPage('demo')" style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.3);color:white;padding:14px 28px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.2s;letter-spacing:-0.2px;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
           <span style="font-size:16px;">▶</span> Watch a live demo
         </button>
       </div>
-    </div>
-  </div>
-
-  <!-- DEMO BILL SECTION - full width, shown when demo is running -->
-  <div id="demoBillSection" style="display:none; background:#f0f7f4; border-top:3px solid var(--brand-mid); border-bottom:3px solid var(--brand-mid); padding:48px 2rem;">
-    <div style="max-width:900px; margin:0 auto;">
-      <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
-        <div>
-          <div style="display:inline-flex;align-items:center;gap:8px;background:var(--brand);color:white;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:5px 12px;border-radius:20px;margin-bottom:10px;">
-            <span style="width:6px;height:6px;background:#5DCAA5;border-radius:50%;display:inline-block;"></span> Live demo — generated for this session
-          </div>
-          <div style="font-size:22px; font-weight:800; color:var(--text); letter-spacing:-0.5px;">This is the bill GridAudit is about to audit</div>
-          <div style="font-size:14px; color:var(--text-muted); margin-top:6px;">Every detail is unique — utility, facility, charges, account number. Scroll down and click Run free audit.</div>
-        </div>
-        <button class="btn btn-ghost" onclick="runDemo()" style="flex-shrink:0; white-space:nowrap;">↺ Generate a different bill</button>
-      </div>
-      <canvas id="demoBillCanvas" style="width:100%; border-radius:14px; border:1px solid rgba(15,110,86,0.2); display:block; box-shadow:0 8px 32px rgba(15,110,86,0.12);"></canvas>
-      <p style="font-size:13px; color:var(--text-hint); margin-top:14px; text-align:center;">↓ Scroll down and click <strong>Run free audit</strong> to see GridAudit analyze this bill</p>
     </div>
   </div>
 
@@ -645,6 +627,65 @@
     </div>
   </div>
 
+</div>
+
+<!-- DEMO PAGE -->
+<div id="pageDemo" class="page">
+  <!-- Dark header bar matching hero -->
+  <div style="background:linear-gradient(135deg,#04342C,#0F6E56); padding:20px 2rem; display:flex; align-items:center; justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <a href="#" onclick="showPage('landing')" style="color:rgba(255,255,255,0.7); font-size:13px; text-decoration:none;">← Back to home</a>
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.9);">
+        <span id="demoDot" style="width:6px;height:6px;background:#5DCAA5;border-radius:50%;display:inline-block;animation:pulse-dot 2s infinite;"></span>
+        Live demo
+      </div>
+    </div>
+    <button class="btn btn-ghost" onclick="runDemo()" style="color:white;border-color:rgba(255,255,255,0.3);font-size:13px;">↺ Generate new bill</button>
+  </div>
+
+  <!-- Bill display -->
+  <div style="background:#f0f7f4; padding:40px 2rem; border-bottom:1px solid var(--border);">
+    <div style="max-width:900px; margin:0 auto;">
+      <div style="margin-bottom:20px;">
+        <div style="font-size:22px; font-weight:800; color:var(--text); letter-spacing:-0.5px; margin-bottom:6px;">This is the bill GridAudit is about to audit</div>
+        <div style="font-size:14px; color:var(--text-muted);">Procedurally generated — unique utility, facility, charges, and account number every time. Click Run free audit below to see the full analysis.</div>
+      </div>
+      <canvas id="demoBillCanvas" style="width:100%; border-radius:14px; border:1px solid rgba(15,110,86,0.2); display:block; box-shadow:0 8px 32px rgba(15,110,86,0.12);"></canvas>
+    </div>
+  </div>
+
+  <!-- Upload card for demo -->
+  <div style="max-width:620px; margin:0 auto; padding:0 2rem 80px;">
+    <div style="background:white; border-radius:20px; border:1px solid rgba(15,110,86,0.12); box-shadow:0 8px 48px rgba(15,110,86,0.18); overflow:hidden; margin-top:-30px; position:relative; z-index:10;">
+      <div style="display:flex; align-items:center; gap:0; padding:22px 28px 0;">
+        <div class="step-pill done" id="demoPill1"><span class="step-pill-num">1</span><span class="step-pill-label">Upload bill</span></div>
+        <div class="step-connector"></div>
+        <div class="step-pill done" id="demoPill2"><span class="step-pill-num">2</span><span class="step-pill-label">Your facility</span></div>
+        <div class="step-connector"></div>
+        <div class="step-pill active" id="demoPill3"><span class="step-pill-num">3</span><span class="step-pill-label">Run audit</span></div>
+      </div>
+      <div style="padding:20px 28px 28px;">
+        <div id="demoFacilityInfo" style="background:var(--surface-2); border-radius:10px; padding:14px 16px; margin-bottom:16px; font-size:13px; color:var(--text-muted);"></div>
+
+        <div class="progress-wrap" id="demoProgressWrap">
+          <div class="progress-label">
+            <span id="demoProgressLabel">Ready to audit...</span>
+            <span id="demoProgressPct">0%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="demoProgressFill" style="width:0%"></div></div>
+          <div class="progress-steps">
+            <div class="step-item" id="demoStep1"><div class="step-dot">1</div>Extracting line items from bill</div>
+            <div class="step-item" id="demoStep2"><div class="step-dot">2</div>Identifying rate schedule</div>
+            <div class="step-item" id="demoStep3"><div class="step-dot">3</div>Comparing to published rate data</div>
+            <div class="step-item" id="demoStep4"><div class="step-dot">4</div>Calculating exact savings</div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-lg" style="width:100%; margin-top:16px;" id="demoAuditBtn" onclick="startDemoAudit()">Run free audit →</button>
+        <p style="font-size:12px; color:var(--text-hint); text-align:center; margin-top:10px;">This is a demo. No account needed. Takes about 60 seconds.</p>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- FAQ PAGE -->
@@ -1016,12 +1057,11 @@ if (SUPABASE_URL && SUPABASE_ANON_KEY) {
 // ── PAGES ─────────────────────────────────────────────────────
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const map = { landing:'pageLanding', results:'pageResults', dashboard:'pageDashboard', report:'pageReport', admin:'pageAdmin', faq:'pageFaq' };
+  const map = { landing:'pageLanding', results:'pageResults', dashboard:'pageDashboard', report:'pageReport', admin:'pageAdmin', faq:'pageFaq', demo:'pageDemo' };
   document.getElementById(map[name]).classList.add('active');
   window.scrollTo(0,0);
   if (name === 'landing') {
     isDemoMode = false;
-    document.getElementById('demoBillSection').style.display = 'none';
   }
 }
 
@@ -1114,56 +1154,87 @@ function onUtilitySelected(select) {
   }
 }
 
+
 // ── DEMO MODE ─────────────────────────────────────────────────
+let currentDemoData = null;
+
 function runDemo() {
   isDemoMode = true;
   const demo = generateDemoBill();
+  currentDemoData = demo;
 
-  // Show full-width demo section and render bill
-  const section = document.getElementById('demoBillSection');
+  showPage('demo');
+
   const canvas = document.getElementById('demoBillCanvas');
-  canvas.width = 960;
-  canvas.height = Math.round(960 * (1056/816));
+  canvas.width = 900;
+  canvas.height = Math.round(900 * (1056/816));
   renderBillToCanvas(canvas.getContext('2d'), demo);
-  section.style.display = 'block';
 
-  // Scroll to demo section
-  setTimeout(() => section.scrollIntoView({ behavior: 'smooth' }), 100);
+  document.getElementById('demoFacilityInfo').innerHTML =
+    `<strong>${demo.facilityName}</strong> &nbsp;·&nbsp; ${demo.facilityType} &nbsp;·&nbsp; ${demo.state} &nbsp;·&nbsp; ${demo.utility.name} &nbsp;·&nbsp; ${demo.utilityType}`;
 
-  // Generate file from canvas for actual upload
-  const fullCanvas = document.createElement('canvas');
-  fullCanvas.width = 816;
-  fullCanvas.height = 1056;
-  renderBillToCanvas(fullCanvas.getContext('2d'), demo);
+  document.getElementById('demoProgressWrap').classList.remove('show');
+  document.getElementById('demoAuditBtn').disabled = false;
+  document.getElementById('demoAuditBtn').textContent = 'Run free audit →';
+  ['demoStep1','demoStep2','demoStep3','demoStep4'].forEach(id => {
+    document.getElementById(id).className = 'step-item';
+  });
+}
 
-  fullCanvas.toBlob(blob => {
-    const file = new File([blob], `demo-bill-${demo.accountNumber}.png`, { type: 'image/png' });
-    selectedFile = file;
-    document.getElementById('fileName').textContent = file.name;
-    document.getElementById('fileSelected').classList.add('show');
+async function startDemoAudit() {
+  if (!currentDemoData) return;
+  const demo = currentDemoData;
+  const btn = document.getElementById('demoAuditBtn');
+  btn.disabled = true;
+  btn.textContent = 'Analyzing...';
 
-    // Pre-fill form and advance to step 2
-    goToStep2(true);
-    document.getElementById('orgName').value = demo.facilityName;
-    document.getElementById('facilityType').value = demo.facilityType;
+  const progressWrap = document.getElementById('demoProgressWrap');
+  progressWrap.classList.add('show');
 
-    const stateSelect = document.getElementById('stateSelect');
-    for (let i = 0; i < stateSelect.options.length; i++) {
-      if (stateSelect.options[i].text === demo.state) {
-        stateSelect.selectedIndex = i;
-        break;
-      }
-    }
-    loadCounties(demo.state);
+  const steps = [
+    { label:'Extracting line items from bill...', pct:25, id:'demoStep1' },
+    { label:'Identifying rate schedule...', pct:50, id:'demoStep2' },
+    { label:'Comparing to published rate data...', pct:75, id:'demoStep3' },
+    { label:'Calculating exact savings...', pct:95, id:'demoStep4' }
+  ];
 
-    document.querySelectorAll('.util-btn').forEach(b => b.classList.remove('selected'));
-    const utilBtn = document.querySelector(`.util-btn[onclick*="'${demo.utilityType}'"]`);
-    if (utilBtn) utilBtn.classList.add('selected');
-    document.getElementById('utilityType').value = demo.utilityType;
+  for (const step of steps) {
+    const prev = steps[steps.indexOf(step)-1];
+    if (prev) document.getElementById(prev.id).className = 'step-item done';
+    document.getElementById(step.id).className = 'step-item active';
+    document.getElementById('demoProgressFill').style.width = step.pct + '%';
+    document.getElementById('demoProgressLabel').textContent = step.label;
+    document.getElementById('demoProgressPct').textContent = step.pct + '%';
+    await new Promise(r => setTimeout(r, 900));
+  }
 
-    // Scroll to upload card so they can click Run audit
-    setTimeout(() => document.getElementById('uploadCard').scrollIntoView({ behavior: 'smooth' }), 800);
-  }, 'image/png');
+  let auditResult;
+  try {
+    const fullCanvas = document.createElement('canvas');
+    fullCanvas.width = 816; fullCanvas.height = 1056;
+    renderBillToCanvas(fullCanvas.getContext('2d'), demo);
+    const blob = await new Promise(r => fullCanvas.toBlob(r, 'image/png'));
+    const base64 = await new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result.split(',')[1]);
+      reader.onerror = rej;
+      reader.readAsDataURL(blob);
+    });
+    auditResult = await callClaudeAudit(base64, 'image/png', {
+      org: demo.facilityName, facility: demo.facilityType,
+      state: demo.state, utility: demo.utilityType,
+      utilityId: null, stateCode: demo.stateCode
+    });
+  } catch(e) {
+    auditResult = getDemoAuditResult(demo.facilityName, demo.facilityType, demo.state, demo.utilityType);
+  }
+
+  document.getElementById('demoProgressFill').style.width = '100%';
+  document.getElementById('demoProgressLabel').textContent = 'Analysis complete';
+  document.getElementById('demoProgressPct').textContent = '100%';
+  document.getElementById('demoStep4').className = 'step-item done';
+  await new Promise(r => setTimeout(r, 600));
+  showFullReport(auditResult, demo.facilityName, demo.facilityType, demo.state, demo.utilityType);
 }
 
 function generateDemoBill() {
