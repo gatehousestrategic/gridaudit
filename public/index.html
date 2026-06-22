@@ -397,6 +397,9 @@
           </div>
           <button class="btn btn-primary btn-lg" style="width:100%; margin-top:18px;" id="nextStepBtn" onclick="goToStep2()">Continue →</button>
           <p style="font-size:12px; color:var(--text-hint); text-align:center; margin-top:10px;">No credit card required. First audit is free.</p>
+          <div style="text-align:center; margin-top:4px;">
+            <button class="btn btn-ghost" style="font-size:12px; padding:6px 14px; color:var(--text-hint);" onclick="runDemo()">▶ See a demo audit first</button>
+          </div>
         </div>
 
         <!-- STEP 2: Facility info -->
@@ -471,6 +474,9 @@
             <button class="btn btn-primary btn-lg" style="flex:1;" id="auditBtn" onclick="startAudit()">Run free audit →</button>
           </div>
           <p style="font-size:12px; color:var(--text-hint); text-align:center; margin-top:10px;">Takes about 60 seconds.</p>
+          <div style="text-align:center; margin-top:8px;">
+            <button class="btn btn-ghost" style="font-size:12px; padding:6px 14px; color:var(--text-hint);" onclick="runDemo()">▶ Run a demo audit instead</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1028,6 +1034,133 @@ function onUtilitySelected(select) {
   } else {
     badge.style.display = 'none';
   }
+}
+
+// ── DEMO MODE ─────────────────────────────────────────────────
+function runDemo() {
+  const scenarios = [
+    {
+      org: 'Sunrise Manor SNF', facility: 'snf', state: 'New York', utility: 'electric',
+      result: {
+        utility_provider: 'Con Edison',
+        account_number: '4821-' + Math.floor(1000+Math.random()*9000),
+        billing_period: 'May 2025',
+        current_rate_schedule: 'SC-8 General Service Large',
+        recommended_rate_schedule: 'SC-8H Healthcare Large',
+        total_bill_amount: 9240,
+        annual_savings_estimate: Math.floor(4800 + Math.random() * 2400),
+        rate_data_used: true,
+        findings: [
+          { type: 'rate_misclassification', title: 'Wrong rate schedule for healthcare facility', description: 'As a licensed SNF, you qualify for SC-8H Healthcare Large which carries a 12% lower base rate. You have been billed under SC-8 General Service since account opening in 2019.', billed_amount: 5840, correct_amount: 5139, monthly_savings: 310, confidence: 'high', action_required: 'File rate reclassification request with Con Edison billing department' },
+          { type: 'tax_exemption', title: 'NYS sales tax charged on exempt usage', description: 'Skilled nursing facilities are exempt from New York State sales tax on utility services under Tax Law §1116(a). You have been charged $142/month in tax you do not legally owe.', billed_amount: 142, correct_amount: 0, monthly_savings: 142, confidence: 'high', action_required: 'Submit Form ST-119.1 exemption certificate to Con Edison' },
+          { type: 'demand_error', title: 'Demand ratchet applied at incorrect percentage', description: 'The 12-month demand ratchet is being calculated at 85% of your peak monthly demand. Your rate schedule specifies 75%. This error has been compounding for at least 8 billing cycles.', billed_amount: 1820, correct_amount: 1607, monthly_savings: 68, confidence: 'medium', action_required: 'Request formal demand charge review for past 12 months' }
+        ],
+        bill_summary: { energy_charges: 5840, demand_charges: 1820, taxes_fees: 1280, other: 300 },
+        recommendations: ['File rate reclassification to SC-8H immediately — recoveries apply retroactively up to 24 months in NY', 'Submit ST-119.1 sales tax exemption certificate — estimated $3,408 in retroactive refunds', 'Request demand charge audit covering the past 12 billing cycles', 'Schedule annual bill review to catch future rate changes']
+      }
+    },
+    {
+      org: 'Riverside Apartments', facility: 'multifamily', state: 'New Jersey', utility: 'electric',
+      result: {
+        utility_provider: 'PSE&G',
+        account_number: '7733-' + Math.floor(1000+Math.random()*9000),
+        billing_period: 'April 2025',
+        current_rate_schedule: 'LPL Large Power & Light',
+        recommended_rate_schedule: 'TOD Time-of-Day Large',
+        total_bill_amount: 7180,
+        annual_savings_estimate: Math.floor(3600 + Math.random() * 2000),
+        rate_data_used: true,
+        findings: [
+          { type: 'rate_misclassification', title: 'Time-of-day schedule would reduce costs', description: 'Based on your demand profile, PSE&G\'s TOD rate schedule would reduce your monthly bill. Your peak demand occurs primarily during off-peak hours (evenings and weekends), making TOD pricing significantly more favorable.', billed_amount: 4200, correct_amount: 3640, monthly_savings: 226, confidence: 'high', action_required: 'Request rate schedule change to TOD through PSE&G account portal' },
+          { type: 'fuel_adjustment', title: 'Fuel adjustment charge calculated incorrectly', description: 'The Market Transition Charge applied this month is $0.00312/kWh. The PSE&G tariff-specified rate for this period is $0.00287/kWh — a difference of $0.00025/kWh applied to 48,000 kWh of usage.', billed_amount: 150, correct_amount: 138, monthly_savings: 12, confidence: 'medium', action_required: 'File billing dispute citing PSE&G Tariff Schedule MTR' },
+          { type: 'math_error', title: 'Meter multiplier applied incorrectly', description: 'Your CT meter has a multiplier of 40. This billing period shows a multiplier of 42 was applied to the raw meter reading, resulting in an overcharge of approximately 5% on energy charges.', billed_amount: 4200, correct_amount: 3990, monthly_savings: 79, confidence: 'high', action_required: 'Request meter test and billing correction from PSE&G' }
+        ],
+        bill_summary: { energy_charges: 4200, demand_charges: 1840, taxes_fees: 820, other: 320 },
+        recommendations: ['Switch to TOD rate schedule before next billing cycle — no equipment changes required', 'Dispute fuel adjustment overcharge with specific tariff citation', 'Request meter inspection and retroactive billing correction', 'Install interval meter if not already present to optimize TOD pricing']
+      }
+    },
+    {
+      org: 'Keystone Manufacturing LLC', facility: 'manufacturing', state: 'Pennsylvania', utility: 'electric',
+      result: {
+        utility_provider: 'PECO Energy',
+        account_number: '2291-' + Math.floor(1000+Math.random()*9000),
+        billing_period: 'March 2025',
+        current_rate_schedule: 'HT High Tension',
+        recommended_rate_schedule: 'HT-Interruptible',
+        total_bill_amount: 22400,
+        annual_savings_estimate: Math.floor(7200 + Math.random() * 4000),
+        rate_data_used: true,
+        findings: [
+          { type: 'tax_exemption', title: 'PA sales tax on manufacturing energy not exempt', description: 'Pennsylvania exempts electricity used directly in the manufacturing process from state sales tax. Your account is being charged the full 6% PA sales tax on all consumption. Qualifying manufacturing consumption should be 0%.', billed_amount: 1140, correct_amount: 0, monthly_savings: 380, confidence: 'high', action_required: 'File Form REV-1220 exemption certificate with PECO' },
+          { type: 'rate_misclassification', title: 'Interruptible service rate available', description: 'Your load profile qualifies for PECO\'s HT-Interruptible rate, which offers a $4.20/kW discount on demand charges in exchange for allowing PECO to interrupt service up to 10 times per year (typically never exercised). Based on your 280kW demand, this saves $1,176/month.', billed_amount: 8960, correct_amount: 7784, monthly_savings: 234, confidence: 'medium', action_required: 'Apply for interruptible service designation through PECO large account team' },
+          { type: 'demand_error', title: 'Peak demand recorded during maintenance shutdown', description: 'Your highest recorded demand this month (312 kW) occurred on a Saturday morning during what appears to be equipment startup after maintenance. This single reading is driving your demand charges for the month. Demand response controls could eliminate this.', billed_amount: 8960, correct_amount: 7280, monthly_savings: 140, confidence: 'medium', action_required: 'Install demand management controls to stagger equipment startup' }
+        ],
+        bill_summary: { energy_charges: 11200, demand_charges: 8960, taxes_fees: 1680, other: 560 },
+        recommendations: ['File manufacturing exemption certificate immediately — retroactive refunds available for 3 years in PA', 'Apply for interruptible service rate — rarely actually interrupted in practice', 'Implement demand management to avoid startup spikes driving monthly demand charges', 'Consider power factor correction equipment to reduce reactive demand charges']
+      }
+    },
+    {
+      org: 'Lakeview Assisted Living', facility: 'assisted', state: 'Florida', utility: 'gas',
+      result: {
+        utility_provider: 'Florida City Gas',
+        account_number: '5514-' + Math.floor(1000+Math.random()*9000),
+        billing_period: 'February 2025',
+        current_rate_schedule: 'GS-2 General Service',
+        recommended_rate_schedule: 'GS-2H Healthcare Service',
+        total_bill_amount: 3840,
+        annual_savings_estimate: Math.floor(2400 + Math.random() * 1600),
+        rate_data_used: true,
+        findings: [
+          { type: 'rate_misclassification', title: 'Healthcare rate schedule not applied', description: 'Florida City Gas offers a separate rate schedule for licensed healthcare facilities including assisted living communities. GS-2H carries a lower distribution charge and reduced customer charge compared to your current GS-2 General Service classification.', billed_amount: 2100, correct_amount: 1820, monthly_savings: 163, confidence: 'high', action_required: 'Submit Florida healthcare facility license to Florida City Gas rate desk' },
+          { type: 'math_error', title: 'Billing calculation error on distribution charge', description: 'The distribution charge this period was calculated as $0.4821/therm. The current Florida City Gas tariff for GS-2 specifies $0.4614/therm. The $0.0207/therm difference applied to 892 therms results in an $18.46 overcharge this month.', billed_amount: 430, correct_amount: 412, monthly_savings: 18, confidence: 'high', action_required: 'File billing dispute citing Florida City Gas Rate Schedule GS-2, Section 4.2' }
+        ],
+        bill_summary: { energy_charges: 2100, demand_charges: 0, taxes_fees: 420, other: 1320 },
+        recommendations: ['Request reclassification to GS-2H Healthcare rate — file with facility license documentation', 'Dispute distribution charge calculation error citing specific tariff rate', 'Review last 12 months for the same calculation error — file for retroactive credit']
+      }
+    }
+  ];
+
+  // Pick a random scenario
+  const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+  
+  // Add some randomness to savings
+  scenario.result.annual_savings_estimate = Math.floor(scenario.result.annual_savings_estimate);
+
+  // Show progress animation then results
+  const btn = document.getElementById('auditBtn') || document.getElementById('nextStepBtn');
+  
+  // Go to step 2 visually if on step 1
+  if (document.getElementById('uploadStep1').style.display !== 'none') {
+    goToStep2();
+  }
+
+  document.getElementById('pill2').classList.remove('active');
+  document.getElementById('pill2').classList.add('done');
+  document.getElementById('pill3').classList.add('active');
+
+  const progressWrap = document.getElementById('progressWrap');
+  progressWrap.classList.add('show');
+
+  runProgress([
+    { label: 'Extracting line items from bill...', pct: 25, stepId: 'step1' },
+    { label: 'Identifying rate schedule...', pct: 50, stepId: 'step2' },
+    { label: 'Comparing to published rate data...', pct: 75, stepId: 'step3' },
+    { label: 'Calculating exact savings...', pct: 95, stepId: 'step4' }
+  ]).then(() => {
+    setProgress(100, 'Analysis complete');
+    pendingAuditData = {
+      org: scenario.org,
+      facility: scenario.facility,
+      state: scenario.state,
+      utility: scenario.utility,
+      utilityId: null,
+      auditResult: scenario.result
+    };
+    setTimeout(() => {
+      showResultsPage(scenario.result, scenario.org, scenario.facility, scenario.state, scenario.utility);
+      resetAuditUI();
+    }, 600);
+  });
 }
 
 // ── STEP NAVIGATION ───────────────────────────────────────────
