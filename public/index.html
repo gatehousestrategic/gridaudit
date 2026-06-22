@@ -360,15 +360,25 @@
     </div>
   </div>
 
+  <!-- DEMO BILL SECTION - full width, shown when demo is running -->
+  <div id="demoBillSection" style="display:none; background:var(--surface-2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:40px 2rem;">
+    <div style="max-width:960px; margin:0 auto;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <div>
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--brand); margin-bottom:4px;">Live demo — generated for this session</div>
+          <div style="font-size:18px; font-weight:700; color:var(--text);">This is the bill GridAudit is about to audit</div>
+          <div style="font-size:14px; color:var(--text-muted); margin-top:2px;">Every detail is procedurally generated — utility, facility, charges, account number. Unique each time.</div>
+        </div>
+        <button class="btn btn-ghost" onclick="runDemo()" style="flex-shrink:0;">Generate a different bill ↺</button>
+      </div>
+      <canvas id="demoBillCanvas" style="width:100%; max-width:960px; border-radius:12px; border:1px solid var(--border); display:block; box-shadow:0 4px 24px rgba(0,0,0,0.08);"></canvas>
+      <p style="font-size:12px; color:var(--text-hint); margin-top:10px; text-align:center;">Scroll down to see the audit results after clicking Run free audit ↓</p>
+    </div>
+  </div>
+
   <!-- UPLOAD CARD FLOATING -->
   <div class="upload-float">
     <div class="upload-card" id="uploadCard">
-      <!-- Demo bill preview -->
-      <div id="demoBillPreview" style="display:none; padding:16px 28px 0;">
-        <div style="font-size:12px; font-weight:600; color:var(--brand); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Demo bill — generated for this session</div>
-        <canvas id="demoBillCanvas" style="width:100%; border-radius:8px; border:1px solid var(--border); display:block;"></canvas>
-        <p style="font-size:12px; color:var(--text-hint); margin-top:6px; text-align:center;">This is a procedurally generated sample bill. Click Run audit to see GridAudit in action.</p>
-      </div>
       <!-- Step indicators -->
       <div style="display:flex; align-items:center; gap:0; padding:22px 28px 0;">
         <div class="step-pill active" id="pill1">
@@ -959,7 +969,7 @@ function showPage(name) {
   window.scrollTo(0,0);
   if (name === 'landing') {
     isDemoMode = false;
-    document.getElementById('demoBillPreview').style.display = 'none';
+    document.getElementById('demoBillSection').style.display = 'none';
   }
 }
 
@@ -1057,18 +1067,18 @@ function runDemo() {
   isDemoMode = true;
   const demo = generateDemoBill();
 
-  // Show bill preview immediately
-  const previewDiv = document.getElementById('demoBillPreview');
-  const previewCanvas = document.getElementById('demoBillCanvas');
-  previewCanvas.width = 816;
-  previewCanvas.height = 1056;
-  renderBillToCanvas(previewCanvas.getContext('2d'), demo);
-  previewDiv.style.display = 'block';
+  // Show full-width demo section and render bill
+  const section = document.getElementById('demoBillSection');
+  const canvas = document.getElementById('demoBillCanvas');
+  canvas.width = 960;
+  canvas.height = Math.round(960 * (1056/816));
+  renderBillToCanvas(canvas.getContext('2d'), demo);
+  section.style.display = 'block';
 
-  // Scroll to upload card
-  setTimeout(() => document.getElementById('uploadCard').scrollIntoView({ behavior: 'smooth' }), 100);
+  // Scroll to demo section
+  setTimeout(() => section.scrollIntoView({ behavior: 'smooth' }), 100);
 
-  // Generate file from canvas
+  // Generate file from canvas for actual upload
   const fullCanvas = document.createElement('canvas');
   fullCanvas.width = 816;
   fullCanvas.height = 1056;
@@ -1099,7 +1109,8 @@ function runDemo() {
     if (utilBtn) utilBtn.classList.add('selected');
     document.getElementById('utilityType').value = demo.utilityType;
 
-    showToast('Demo bill generated — click Run free audit to see results');
+    // Scroll to upload card so they can click Run audit
+    setTimeout(() => document.getElementById('uploadCard').scrollIntoView({ behavior: 'smooth' }), 800);
   }, 'image/png');
 }
 
