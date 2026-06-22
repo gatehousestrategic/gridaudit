@@ -33,7 +33,7 @@
   body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--surface); color: var(--text); line-height: 1.6; }
 
   /* NAV */
-  nav { background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 2.5rem; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; }
+  nav { background: white; border-bottom: 1px solid rgba(15,110,86,0.1); padding: 0 2.5rem; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 12px rgba(15,110,86,0.08); }
   .logo { font-size: 20px; font-weight: 800; color: var(--brand-dark); letter-spacing: -0.5px; display:flex; align-items:center; gap:8px; }
   .logo-icon { width:32px; height:32px; background: var(--brand); border-radius:8px; display:flex; align-items:center; justify-content:center; }
   .logo span { color: var(--brand-mid); }
@@ -56,45 +56,44 @@
 
   /* ── HERO ─────────────────────────────────────────────────── */
   .hero-section {
-    background: linear-gradient(160deg, #04342C 0%, #0F6E56 50%, #1D9E75 100%);
-    padding: 80px 2rem 0;
+    background: linear-gradient(160deg, #04342C 0%, #0F6E56 55%, #1D9E75 100%);
+    padding: 100px 2.5rem 120px;
     overflow: hidden;
     position: relative;
+    width: 100%;
   }
   .hero-grid {
     position: absolute; inset: 0;
     background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
                       linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
     background-size: 60px 60px;
-  }
-  .hero-glow {
-    position: absolute; top: -100px; right: -100px;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(29,158,117,0.3) 0%, transparent 70%);
     pointer-events: none;
   }
-  .hero-inner { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
-  .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: rgba(255,255,255,0.85); margin-bottom: 24px; }
-  .hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: #5DCAA5; animation: pulse-dot 2s infinite; }
+  .hero-glow {
+    position: absolute; top: -150px; right: -150px;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(93,202,165,0.2) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 860px; margin: 0 auto; position: relative; z-index: 1; }
+  .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: rgba(255,255,255,0.9); margin-bottom: 28px; }
+  .hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: #5DCAA5; animation: pulse-dot 2s infinite; flex-shrink:0; }
   @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
-  .hero h1 { font-size: clamp(36px, 5.5vw, 62px); font-weight: 800; line-height: 1.1; letter-spacing: -2px; color: white; margin-bottom: 24px; }
-  .hero h1 em { font-style: normal; color: #5DCAA5; }
-  .hero-sub { font-size: 18px; color: rgba(255,255,255,0.72); max-width: 560px; margin-bottom: 40px; line-height: 1.65; }
+  .hero-h1 { font-size: clamp(38px, 5.5vw, 64px); font-weight: 800; line-height: 1.1; letter-spacing: -2px; color: white !important; margin-bottom: 24px; }
+  .hero-h1 em { font-style: normal; color: #5DCAA5; }
+  .hero-sub { font-size: 18px; color: rgba(255,255,255,0.75); max-width: 580px; margin-bottom: 48px; line-height: 1.65; }
 
   /* HERO STATS */
-  .hero-stats { display: flex; gap: 0; margin-bottom: 56px; }
-  .hero-stat { padding: 0 32px 0 0; }
-  .hero-stat:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.15); margin-right: 32px; }
-  .hero-stat-num { font-size: 32px; font-weight: 800; color: white; letter-spacing: -1px; }
-  .hero-stat-label { font-size: 12px; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  .hero-stats { display: flex; gap: 0; }
+  .hero-stat { padding-right: 40px; }
+  .hero-stat:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.15); margin-right: 40px; }
+  .hero-stat-num { font-size: 36px; font-weight: 800; color: white; letter-spacing: -1.5px; line-height: 1; }
+  .hero-stat-label { font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
 
-  /* HERO BOTTOM FADE */
-  .hero-bottom { height: 60px; background: linear-gradient(to bottom, transparent, var(--surface)); margin-top: -1px; }
-
-  /* UPLOAD CARD — floats at bottom of hero */
-  .upload-float { max-width: 620px; margin: -20px auto 0; padding: 0 2rem; position: relative; z-index: 10; }
-  .upload-card { background: var(--surface); border-radius: 20px; border: 1px solid rgba(15,110,86,0.15); box-shadow: var(--shadow-lg); overflow: hidden; }
-  .upload-body { padding: 24px 28px 28px; }
+  /* UPLOAD CARD — floats below hero */
+  .upload-float { max-width: 620px; margin: -40px auto 0; padding: 0 2rem 80px; position: relative; z-index: 10; }
+  .upload-card { background: white; border-radius: 20px; border: 1px solid rgba(15,110,86,0.12); box-shadow: 0 8px 48px rgba(15,110,86,0.18); overflow: hidden; }
+  .upload-body { padding: 20px 28px 28px; }
   label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; margin-top: 14px; }
   input, select { width: 100%; padding: 10px 13px; border: 1.5px solid var(--border-strong); border-radius: 9px; font-size: 14px; background: var(--surface); color: var(--text); transition: border-color 0.15s, box-shadow 0.15s; font-family: inherit; }
   input:focus, select:focus { outline: none; border-color: var(--brand-mid); box-shadow: 0 0 0 3px rgba(29,158,117,0.12); }
@@ -335,7 +334,7 @@
         <span class="hero-eyebrow-dot"></span>
         AI-Powered Utility Bill Auditing
       </div>
-      <h1 class="hero">Your utility bills are<br><em>overcharging you.</em><br>We'll prove it — free.</h1>
+      <h1 class="hero-h1">Your utility bills are<br><em>overcharging you.</em><br>We'll prove it — free.</h1>
       <p class="hero-sub">Upload any commercial utility bill. Our AI cross-references every charge against your state's tariff schedules and flags every overcharge, misclassification, and billing error in under 60 seconds.</p>
       <div class="hero-stats">
         <div class="hero-stat">
@@ -352,7 +351,6 @@
         </div>
       </div>
     </div>
-    <div class="hero-bottom"></div>
   </div>
 
   <!-- UPLOAD CARD FLOATING -->
@@ -422,10 +420,23 @@
             </div>
             <div>
               <label>State</label>
-              <select id="stateSelect">
+              <select id="stateSelect" onchange="loadCounties(this.value)">
                 <option value="">Select state...</option>
                 <option>Alabama</option><option>Alaska</option><option>Arizona</option><option>Arkansas</option><option>California</option><option>Colorado</option><option>Connecticut</option><option>Delaware</option><option>Florida</option><option>Georgia</option><option>Hawaii</option><option>Idaho</option><option>Illinois</option><option>Indiana</option><option>Iowa</option><option>Kansas</option><option>Kentucky</option><option>Louisiana</option><option>Maine</option><option>Maryland</option><option>Massachusetts</option><option>Michigan</option><option>Minnesota</option><option>Mississippi</option><option>Missouri</option><option>Montana</option><option>Nebraska</option><option>Nevada</option><option>New Hampshire</option><option>New Jersey</option><option>New Mexico</option><option>New York</option><option>North Carolina</option><option>North Dakota</option><option>Ohio</option><option>Oklahoma</option><option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option><option>South Carolina</option><option>South Dakota</option><option>Tennessee</option><option>Texas</option><option>Utah</option><option>Vermont</option><option>Virginia</option><option>Washington</option><option>West Virginia</option><option>Wisconsin</option><option>Wyoming</option>
               </select>
+            </div>
+            <div>
+              <label>County</label>
+              <select id="countySelect" onchange="loadUtilities(this.value)" disabled>
+                <option value="">Select state first...</option>
+              </select>
+            </div>
+            <div style="grid-column:1/-1;">
+              <label>Utility provider</label>
+              <select id="utilitySelect" disabled onchange="onUtilitySelected(this)">
+                <option value="">Select county first...</option>
+              </select>
+              <div id="utilityVerified" style="display:none; font-size:12px; margin-top:6px; padding:5px 10px; border-radius:6px;"></div>
             </div>
             <div style="grid-column:1/-1;">
               <label>Utility type</label>
@@ -436,6 +447,7 @@
                 <div class="util-btn" onclick="selectUtil(this,'oil')"><div>🛢️</div><div>Oil / Propane</div></div>
               </div>
               <input type="hidden" id="utilityType" value="" />
+              <input type="hidden" id="selectedUtilityId" value="" />
             </div>
           </div>
 
@@ -447,9 +459,9 @@
             <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
             <div class="progress-steps">
               <div class="step-item" id="step1"><div class="step-dot">1</div>Extracting line items from bill</div>
-              <div class="step-item" id="step2"><div class="step-dot">2</div>Identifying utility & rate schedule</div>
-              <div class="step-item" id="step3"><div class="step-dot">3</div>Checking against state tariff database</div>
-              <div class="step-item" id="step4"><div class="step-dot">4</div>Calculating potential savings</div>
+              <div class="step-item" id="step2"><div class="step-dot">2</div>Identifying rate schedule</div>
+              <div class="step-item" id="step3"><div class="step-dot">3</div>Comparing to published rate data</div>
+              <div class="step-item" id="step4"><div class="step-dot">4</div>Calculating exact savings</div>
             </div>
           </div>
 
@@ -464,7 +476,7 @@
   </div>
 
   <!-- HOW IT WORKS -->
-  <div class="how-section" style="margin-top:80px;">
+  <div class="how-section">
     <div class="how-inner">
       <div class="section-eyebrow" style="text-align:center;">How it works</div>
       <div class="section-title" style="text-align:center;">From upload to savings in 60 seconds</div>
@@ -1155,6 +1167,95 @@ function showPage(name) {
   window.scrollTo(0,0);
 }
 
+// ── CASCADING DROPDOWNS ───────────────────────────────────────
+const STATE_CODES = {
+  'Alabama':'AL','Alaska':'AK','Arizona':'AZ','Arkansas':'AR','California':'CA',
+  'Colorado':'CO','Connecticut':'CT','Delaware':'DE','Florida':'FL','Georgia':'GA',
+  'Hawaii':'HI','Idaho':'ID','Illinois':'IL','Indiana':'IN','Iowa':'IA','Kansas':'KS',
+  'Kentucky':'KY','Louisiana':'LA','Maine':'ME','Maryland':'MD','Massachusetts':'MA',
+  'Michigan':'MI','Minnesota':'MN','Mississippi':'MS','Missouri':'MO','Montana':'MT',
+  'Nebraska':'NE','Nevada':'NV','New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM',
+  'New York':'NY','North Carolina':'NC','North Dakota':'ND','Ohio':'OH','Oklahoma':'OK',
+  'Oregon':'OR','Pennsylvania':'PA','Rhode Island':'RI','South Carolina':'SC',
+  'South Dakota':'SD','Tennessee':'TN','Texas':'TX','Utah':'UT','Vermont':'VT',
+  'Virginia':'VA','Washington':'WA','West Virginia':'WV','Wisconsin':'WI','Wyoming':'WY'
+};
+
+async function loadCounties(stateName) {
+  const countySelect = document.getElementById('countySelect');
+  const utilitySelect = document.getElementById('utilitySelect');
+  countySelect.innerHTML = '<option value="">Loading...</option>';
+  countySelect.disabled = true;
+  utilitySelect.innerHTML = '<option value="">Select county first...</option>';
+  utilitySelect.disabled = true;
+  document.getElementById('selectedUtilityId').value = '';
+  document.getElementById('utilityVerified').style.display = 'none';
+
+  if (!stateName) return;
+  const stateCode = STATE_CODES[stateName];
+  if (!stateCode) return;
+
+  try {
+    const res = await fetch(`/api/counties/${stateCode}`);
+    const { counties } = await res.json();
+    if (counties && counties.length > 0) {
+      countySelect.innerHTML = '<option value="">Select county...</option>' +
+        counties.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      countySelect.disabled = false;
+    } else {
+      countySelect.innerHTML = '<option value="">No counties found</option>';
+    }
+  } catch(e) {
+    countySelect.innerHTML = '<option value="">Error loading counties</option>';
+  }
+}
+
+async function loadUtilities(countyId) {
+  const utilitySelect = document.getElementById('utilitySelect');
+  utilitySelect.innerHTML = '<option value="">Loading...</option>';
+  utilitySelect.disabled = true;
+  document.getElementById('selectedUtilityId').value = '';
+  document.getElementById('utilityVerified').style.display = 'none';
+
+  if (!countyId) return;
+
+  try {
+    const res = await fetch(`/api/utilities/${countyId}`);
+    const { utilities } = await res.json();
+    if (utilities && utilities.length > 0) {
+      utilitySelect.innerHTML = '<option value="">Select utility...</option>' +
+        utilities.map(u => `<option value="${u.id}" data-verified="${u.last_verified_at}" data-status="${u.verification_status}">${u.name}</option>`).join('');
+      utilitySelect.disabled = false;
+    } else {
+      utilitySelect.innerHTML = '<option value="">No utilities found for this county</option>';
+    }
+  } catch(e) {
+    utilitySelect.innerHTML = '<option value="">Error loading utilities</option>';
+  }
+}
+
+function onUtilitySelected(select) {
+  const option = select.options[select.selectedIndex];
+  const utilityId = option.value;
+  const verifiedAt = option.dataset.verified;
+  const status = option.dataset.status;
+  document.getElementById('selectedUtilityId').value = utilityId;
+
+  const badge = document.getElementById('utilityVerified');
+  if (utilityId && verifiedAt) {
+    const date = new Date(verifiedAt).toLocaleDateString();
+    const isStale = status === 'stale' || status === 'flagged';
+    badge.style.display = 'block';
+    badge.style.background = isStale ? '#FEF3C7' : '#E1F5EE';
+    badge.style.color = isStale ? '#92400e' : '#085041';
+    badge.innerHTML = isStale
+      ? `⚠️ Rate data last verified ${date} — under review`
+      : `✓ Rate data verified ${date}`;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
 // ── STEP NAVIGATION ───────────────────────────────────────────
 function goToStep2() {
   if (!selectedFile) { showToast('Please upload a utility bill first'); return; }
@@ -1209,6 +1310,8 @@ async function startAudit() {
   const facility = document.getElementById('facilityType').value;
   const state = document.getElementById('stateSelect').value;
   const utility = document.getElementById('utilityType').value;
+  const utilityId = document.getElementById('selectedUtilityId').value;
+  const stateCode = STATE_CODES[state] || '';
 
   if (!selectedFile) { showToast('Please upload a utility bill first'); return; }
   if (!org) { showToast('Please enter your organization name'); return; }
@@ -1227,12 +1330,11 @@ async function startAudit() {
 
   await runProgress([
     { label: 'Extracting line items from bill...', pct: 25, stepId: 'step1' },
-    { label: 'Identifying utility & rate schedule...', pct: 50, stepId: 'step2' },
-    { label: 'Checking against state tariff database...', pct: 75, stepId: 'step3' },
-    { label: 'Calculating potential savings...', pct: 95, stepId: 'step4' }
+    { label: 'Identifying rate schedule...', pct: 50, stepId: 'step2' },
+    { label: 'Comparing to published rate data...', pct: 75, stepId: 'step3' },
+    { label: 'Calculating exact savings...', pct: 95, stepId: 'step4' }
   ]);
 
-  // Convert file to base64
   let base64Data, mediaType;
   try {
     const result = await fileToBase64(selectedFile);
@@ -1244,17 +1346,15 @@ async function startAudit() {
     return;
   }
 
-  // Call Claude API
   let auditResult;
   try {
-    auditResult = await callClaudeAudit(base64Data, mediaType, { org, facility, state, utility });
+    auditResult = await callClaudeAudit(base64Data, mediaType, { org, facility, state, utility, utilityId, stateCode });
   } catch(e) {
-    // Demo mode if API not configured
     auditResult = getDemoAuditResult(org, facility, state, utility);
   }
 
   setProgress(100, 'Analysis complete');
-  pendingAuditData = { org, facility, state, utility, auditResult };
+  pendingAuditData = { org, facility, state, utility, utilityId, auditResult };
 
   await new Promise(r => setTimeout(r, 600));
   showResultsPage(auditResult, org, facility, state, utility);
@@ -1267,19 +1367,27 @@ async function callClaudeAudit(base64Data, mediaType, meta) {
     ? { type: 'document', source: { type: 'base64', media_type: mediaType, data: base64Data } }
     : { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64Data } };
 
-  const prompt = `You are a utility bill auditing expert with deep knowledge of state tariff schedules across all 50 US states.
+  const prompt = `You are a utility bill auditing expert. You will be provided with authoritative published rate schedule data for this specific utility.
 
-Analyze this utility bill for ${meta.org}, a ${meta.facility} in ${meta.state}. Utility type: ${meta.utility}.
+Analyze this utility bill for ${meta.org}, a ${meta.facility} facility in ${meta.state}. Utility type: ${meta.utility}.
 
-Identify ALL potential billing errors, overcharges, and misclassifications. Focus on:
-1. Rate schedule misclassification (wrong tariff for facility type)
-2. Demand charge errors
-3. Tax exemptions the facility may qualify for (especially healthcare/SNF)
-4. Fuel adjustment calculation errors
-5. Meter/math errors
-6. Any charges inconsistent with published state tariff schedules
+INSTRUCTIONS:
+1. Extract every line item from the bill with its amount
+2. Compare each charge against the AUTHORITATIVE RATE DATA that will be appended to this message
+3. Identify EXACT discrepancies — where the billed amount differs from the published rate
+4. Calculate precise monthly and annual savings for each finding
+5. Only report findings you can substantiate against the rate data
+6. If rate data is not provided, use your knowledge of ${meta.state} utility regulations
 
-Respond ONLY with valid JSON (no markdown), this exact structure:
+Focus on:
+- Rate schedule misclassification (is this facility on the correct schedule for its type?)
+- Demand charge calculation errors (wrong ratchet %, wrong peak reading)
+- Tax and fee exemptions this facility type qualifies for in ${meta.state}
+- Fuel/energy adjustment calculation errors
+- Math errors in billing
+- Any charge that exceeds the published rate
+
+Respond ONLY with valid JSON (no markdown):
 {
   "utility_provider": "string",
   "account_number": "string or null",
@@ -1288,11 +1396,14 @@ Respond ONLY with valid JSON (no markdown), this exact structure:
   "recommended_rate_schedule": "string or null",
   "total_bill_amount": number,
   "annual_savings_estimate": number,
+  "rate_data_used": true or false,
   "findings": [
     {
       "type": "rate_misclassification|demand_error|tax_exemption|fuel_adjustment|math_error|other",
       "title": "string",
-      "description": "string",
+      "description": "string — be specific, cite the rate schedule and exact discrepancy",
+      "billed_amount": number or null,
+      "correct_amount": number or null,
       "monthly_savings": number,
       "confidence": "high|medium|low",
       "action_required": "string"
@@ -1311,6 +1422,9 @@ Respond ONLY with valid JSON (no markdown), this exact structure:
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
+      utilityId: meta.utilityId || null,
+      stateCode: meta.stateCode || null,
+      facilityType: meta.facility || null,
       messages: [{
         role: 'user',
         content: [contentBlock, { type: 'text', text: prompt }]
