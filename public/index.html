@@ -1163,7 +1163,7 @@ const SUPABASE_URL = window.__GA_CONFIG?.supabaseUrl || '';
 const SUPABASE_ANON_KEY = window.__GA_CONFIG?.supabaseAnonKey || '';
 const CLAUDE_API = '/api/audit'; // proxied through our server
 
-let supabase = null;
+let sbClient = null;
 let currentUser = null;
 let pendingAuditData = null;
 let authMode = 'signup';
@@ -1171,7 +1171,7 @@ let authMode = 'signup';
 // Init Supabase — works as long as URL and key are non-empty
 if (SUPABASE_URL && SUPABASE_ANON_KEY) {
   try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   } catch(e) {
     console.error('Supabase init failed:', e);
   }
@@ -1544,8 +1544,8 @@ function showResultsPage(result, org, facility, state, utility) {
   showPage('results');
 
   // Capture lead — anonymous user saw savings estimate but hasn't signed up
-  if (supabase) {
-    supabase.from('leads').insert({
+  if (sbClient) {
+    sbClient.from('leads').insert({
       org_name: org,
       facility_type: facility,
       state,
@@ -1692,7 +1692,7 @@ async function handleAuth() {
   errEl.classList.remove('show');
   if (!email || !password) { showAuthError('Please fill in all fields'); return; }
 
-  if (!supabase) {
+  if (!sbClient) {
     showAuthError('Authentication is not configured yet. Please check server environment variables.');
     return;
   }
@@ -1704,9 +1704,9 @@ async function handleAuth() {
   try {
     let result;
     if (authMode === 'signup') {
-      result = await supabase.auth.signUp({ email, password, options: { data: { org_name: name } } });
+      result = await sbClient.auth.signUp({ email, password, options: { data: { org_name: name } } });
     } else {
-      result = await supabase.auth.signInWithPassword({ email, password });
+      result = await sbClient.auth.signInWithPassword({ email, password });
     }
 
     if (result.error) {
@@ -1741,7 +1741,7 @@ async function handleAuth() {
 
 async function saveAuditToSupabase(userId, auditData) {
   const r = auditData.auditResult;
-  const { error } = await supabase.from('audits').insert({
+  const { error } = await sbClient.from('audits').insert({
     user_id: userId,
     org_name: auditData.org,
     facility_type: auditData.facility,
@@ -1785,7 +1785,7 @@ function updateNav(loggedIn) {
 }
 
 async function logout() {
-  if (supabase) await supabase.auth.signOut();
+  if (sbClient) await sbClient.auth.signOut();
   currentUser = null;
   updateNav(false);
   showPage('landing');
@@ -1902,8 +1902,8 @@ async function checkAdminPassword() {
 }
 
 async function adminLoadStats() {
-  const { data: profiles } = await supabase.from('profiles').select('tier');
-  const { data: audits } = await supabase.from('audits').select('annual_savings_estimate');
+  const { data: profiles } = await sbClient.from('profiles').select('tier');
+  const { data: audits } = await sbClient.from('audits').select('annual_savings_estimate');
   if (profiles) {
     document.getElementById('adminStatUsers').textContent = profiles.length;
     document.getElementById('adminStatPaid').textContent = profiles.filter(p => p.tier !== 'free').length;
@@ -1925,7 +1925,7 @@ async function adminLoadTab(tab) {
   table.innerHTML = '<div class="empty-audits">Loading...</div>';
 
   if (tab === 'users') {
-    const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+    const { data } = await sbClient.from('profiles').select('*').order('created_at', { ascending: false });
     if (!data || data.length === 0) { table.innerHTML = '<div class="empty-audits">No users yet</div>'; return; }
     table.innerHTML = `
       <div class="audit-row audit-head" style="grid-template-columns:2fr 1fr 1fr 1fr 120px;">
@@ -1943,7 +1943,7 @@ async function adminLoadTab(tab) {
         </div>`).join('');
 
   } else if (tab === 'audits') {
-    const { data } = await supabase.from('audits').select('*').order('created_at', { ascending: false });
+    const { data } = await sbClient.from('audits').select('*').order('created_at', { ascending: false });
     if (!data || data.length === 0) { table.innerHTML = '<div class="empty-audits">No audits yet</div>'; return; }
     table.innerHTML = `
       <div class="audit-row audit-head">
@@ -1959,7 +1959,7 @@ async function adminLoadTab(tab) {
         </div>`).join('');
 
   } else if (tab === 'leads') {
-    const { data } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
+    const { data } = await sbClient.from('leads').select('*').order('created_at', { ascending: false });
     if (!data || data.length === 0) { table.innerHTML = '<div class="empty-audits">No leads yet — leads are captured when someone runs the free audit but does not sign up</div>'; return; }
     table.innerHTML = `
       <div class="audit-row audit-head" style="grid-template-columns:2fr 1fr 1fr 1fr;">
@@ -1977,7 +1977,7 @@ async function adminLoadTab(tab) {
 
 async function adminSetTier(userId, tier) {
   const limits = { free:1, basic:2, pro:10, enterprise:999 };
-  const { error } = await supabase.from('profiles')
+  const { error } = await sbClient.from('profiles')
     .update({ tier, audits_limit: limits[tier] || 1 })
     .eq('id', userId);
   if (error) showToast('Error updating tier');
@@ -1996,11 +1996,11 @@ document.getElementById('authModal').addEventListener('click', e => {
 // Initialize nav and session on load
 document.addEventListener('DOMContentLoaded', () => {
   updateNav(false);
-  if (supabase) {
-    supabase.auth.getSession().then(({ data }) => {
+  if (sbClient) {
+    sbClient.auth.getSession().then(({ data }) => {
       if (data.session?.user) showDashboard(data.session.user);
     });
-    supabase.auth.onAuthStateChange((event, session) => {
+    sbClient.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') { currentUser = null; updateNav(false); showPage('landing'); }
     });
   }
