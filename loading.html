@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GridAudit — Loading</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #04342C;
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* GRID BACKGROUND */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(29,158,117,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(29,158,117,0.07) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+  }
+
+  /* PULSE RINGS */
+  .pulse-wrap {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin-bottom: 40px;
+  }
+  .ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgba(29,158,117,0.4);
+    animation: ripple 2.4s ease-out infinite;
+  }
+  .ring:nth-child(2) { animation-delay: 0.6s; }
+  .ring:nth-child(3) { animation-delay: 1.2s; }
+  @keyframes ripple {
+    0%   { transform: scale(0.6); opacity: 0.8; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+
+  /* LOGO CIRCLE */
+  .logo-circle {
+    position: absolute;
+    inset: 18px;
+    background: #0F6E56;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: #9FE1CB;
+  }
+
+  /* TEXT */
+  .logo-text {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: white;
+    margin-bottom: 10px;
+  }
+  .logo-text span { color: #5DCAA5; }
+
+  .status-text {
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 32px;
+    min-height: 20px;
+    transition: opacity 0.4s;
+  }
+
+  /* PROGRESS BAR */
+  .bar-wrap {
+    width: 220px;
+    height: 3px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 48px;
+  }
+  .bar-fill {
+    height: 100%;
+    background: #1D9E75;
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.6s ease;
+  }
+
+  /* FACTS */
+  .fact-box {
+    background: rgba(255,255,255,0.05);
+    border: 0.5px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 16px 24px;
+    max-width: 320px;
+    text-align: center;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .fact-text {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.6;
+    transition: opacity 0.5s;
+  }
+  .fact-text strong {
+    color: rgba(255,255,255,0.85);
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<div class="pulse-wrap">
+  <div class="ring"></div>
+  <div class="ring"></div>
+  <div class="ring"></div>
+  <div class="logo-circle">G</div>
+</div>
+
+<div class="logo-text">Grid<span>Audit</span></div>
+<div class="status-text" id="statusText">Starting up...</div>
+
+<div class="bar-wrap">
+  <div class="bar-fill" id="barFill"></div>
+</div>
+
+<div class="fact-box">
+  <div class="fact-text" id="factText">Loading...</div>
+</div>
+
+<script>
+  const TARGET = 'https://gridaudit.onrender.com';
+  const HEALTH = TARGET + '/api/health';
+
+  const facts = [
+    '<strong>94% of commercial utility bills</strong> contain at least one billing error.',
+    'The average SNF overpays <strong>$4,200 per year</strong> due to rate misclassification.',
+    'Utilities rarely notify customers when a <strong>better rate schedule</strong> becomes available.',
+    'Healthcare facilities in most states qualify for <strong>sales tax exemptions</strong> on utility usage.',
+    'Demand charge errors can persist for <strong>years undetected</strong> — and are usually retroactively recoverable.',
+    'Multifamily buildings are among the <strong>most frequently misclassified</strong> utility customers.',
+    'A single rate reclassification can save a facility <strong>$300–$800 per month</strong>.',
+  ];
+
+  const statuses = [
+    'Starting up...',
+    'Warming up servers...',
+    'Almost there...',
+    'Nearly ready...',
+    'Just a moment...',
+  ];
+
+  let factIndex = 0;
+  let statusIndex = 0;
+  let progress = 0;
+  let attempts = 0;
+  const MAX_ATTEMPTS = 40;
+
+  const barFill = document.getElementById('barFill');
+  const statusText = document.getElementById('statusText');
+  const factEl = document.getElementById('factText');
+
+  // Show first fact immediately
+  factEl.innerHTML = facts[0];
+
+  // Rotate facts every 4 seconds
+  setInterval(() => {
+    factEl.style.opacity = 0;
+    setTimeout(() => {
+      factIndex = (factIndex + 1) % facts.length;
+      factEl.innerHTML = facts[factIndex];
+      factEl.style.opacity = 1;
+    }, 500);
+  }, 4000);
+
+  // Rotate status text
+  setInterval(() => {
+    statusIndex = Math.min(statusIndex + 1, statuses.length - 1);
+    statusText.textContent = statuses[statusIndex];
+  }, 6000);
+
+  // Animate progress bar (slow crawl, never hits 100 until ready)
+  function crawlProgress() {
+    if (progress < 85) {
+      progress += Math.random() * 3;
+      barFill.style.width = Math.min(progress, 85) + '%';
+    }
+  }
+  setInterval(crawlProgress, 800);
+
+  // Poll the app
+  async function checkReady() {
+    attempts++;
+    try {
+      const res = await fetch(HEALTH, { method: 'GET', cache: 'no-store' });
+      if (res.ok) {
+        // Server is up — finish the bar and redirect
+        progress = 100;
+        barFill.style.width = '100%';
+        statusText.textContent = 'Ready!';
+        setTimeout(() => { window.location.href = TARGET; }, 500);
+        return;
+      }
+    } catch (e) {
+      // Still spinning up — keep polling
+    }
+
+    if (attempts < MAX_ATTEMPTS) {
+      setTimeout(checkReady, 3000);
+    } else {
+      // Took too long — send them anyway
+      window.location.href = TARGET;
+    }
+  }
+
+  // Start polling after 2 seconds
+  setTimeout(checkReady, 2000);
+</script>
+</body>
+</html>

@@ -22,6 +22,11 @@ app.get('/', (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Health check — used by the loading page to detect when server is warm
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // Proxy endpoint — keeps CLAUDE_API_KEY server-side, never exposed to browser
 app.post('/api/audit', async (req, res) => {
   const { messages } = req.body;
