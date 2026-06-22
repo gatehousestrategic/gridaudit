@@ -351,12 +351,24 @@
           <div class="hero-stat-label">Tariff coverage</div>
         </div>
       </div>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-lg" onclick="document.getElementById('uploadCard').scrollIntoView({behavior:'smooth'})">Upload your bill →</button>
+        <button onclick="runDemo()" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:14px 24px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+          <span style="font-size:18px;">▶</span> Watch a live demo
+        </button>
+      </div>
     </div>
   </div>
 
   <!-- UPLOAD CARD FLOATING -->
   <div class="upload-float">
-    <div class="upload-card">
+    <div class="upload-card" id="uploadCard">
+      <!-- Demo bill preview -->
+      <div id="demoBillPreview" style="display:none; padding:16px 28px 0;">
+        <div style="font-size:12px; font-weight:600; color:var(--brand); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Demo bill — generated for this session</div>
+        <canvas id="demoBillCanvas" style="width:100%; border-radius:8px; border:1px solid var(--border); display:block;"></canvas>
+        <p style="font-size:12px; color:var(--text-hint); margin-top:6px; text-align:center;">This is a procedurally generated sample bill. Click Run audit to see GridAudit in action.</p>
+      </div>
       <!-- Step indicators -->
       <div style="display:flex; align-items:center; gap:0; padding:22px 28px 0;">
         <div class="step-pill active" id="pill1">
@@ -397,9 +409,6 @@
           </div>
           <button class="btn btn-primary btn-lg" style="width:100%; margin-top:18px;" id="nextStepBtn" onclick="goToStep2()">Continue →</button>
           <p style="font-size:12px; color:var(--text-hint); text-align:center; margin-top:10px;">No credit card required. First audit is free.</p>
-          <div style="text-align:center; margin-top:4px;">
-            <button class="btn btn-ghost" style="font-size:12px; padding:6px 14px; color:var(--text-hint);" onclick="runDemo()">▶ See a demo audit first</button>
-          </div>
         </div>
 
         <!-- STEP 2: Facility info -->
@@ -474,9 +483,6 @@
             <button class="btn btn-primary btn-lg" style="flex:1;" id="auditBtn" onclick="startAudit()">Run free audit →</button>
           </div>
           <p style="font-size:12px; color:var(--text-hint); text-align:center; margin-top:10px;">Takes about 60 seconds.</p>
-          <div style="text-align:center; margin-top:8px;">
-            <button class="btn btn-ghost" style="font-size:12px; padding:6px 14px; color:var(--text-hint);" onclick="runDemo()">▶ Run a demo audit instead</button>
-          </div>
         </div>
       </div>
     </div>
@@ -722,8 +728,8 @@
 <div id="pageResults" class="page">
   <div class="results-page">
     <div class="results-header">
-      <div style="font-size:13px; color:var(--text-hint); margin-bottom:8px;">← <a href="#" onclick="showPage('landing')" style="color:var(--brand);">Run another audit</a></div>
-      <div style="font-size:22px; font-weight:700;">Audit complete — here's what we found</div>
+      <div style="font-size:13px; color:var(--text-hint); margin-bottom:8px;">← <a href="#" onclick="showPage('landing')" style="color:var(--brand);">Back to home</a></div>
+      <div style="font-size:22px; font-weight:700;" id="resultsTitle">Audit complete — here's what we found</div>
       <div style="font-size:14px; color:var(--text-muted); margin-top:4px;" id="resultMeta"></div>
     </div>
 
@@ -731,14 +737,14 @@
       <div class="eyebrow-light">Potential annual savings</div>
       <div class="savings-amount" id="savingsAmount">$4,840</div>
       <div class="savings-period">per year · <span id="savingsMonthly">$403/month</span></div>
-      <div class="savings-note">Based on identified billing errors and tariff misclassifications in this bill</div>
+      <div class="savings-note" id="savingsNote">Based on identified billing errors and rate schedule misclassifications in this bill</div>
     </div>
 
     <div style="font-size:15px; font-weight:600; margin-bottom:12px;">Issues identified <span id="findingCount" style="background:var(--brand-light);color:var(--brand-dark);font-size:12px;padding:2px 9px;border-radius:20px;margin-left:6px;"></span></div>
 
     <div class="findings-list" id="findingsList"></div>
 
-    <div class="gate-box">
+    <div class="gate-box" id="gateBox">
       <div style="font-size:32px; margin-bottom:12px;">🔒</div>
       <h3>Unlock your full audit report</h3>
       <p>Create a free account to see exactly what's wrong, which line items to dispute, and we'll generate the dispute letter for you.</p>
@@ -746,13 +752,18 @@
       <div class="gate-divider"><hr><span>already have an account?</span><hr></div>
       <button class="btn btn-ghost" style="width:100%; max-width:320px;" onclick="showModal('login')">Log in to see full report</button>
     </div>
+
+    <div id="demoFullReport" style="display:none;"></div>
   </div>
 </div>
 
 <!-- FULL REPORT PAGE (authenticated) -->
 <div id="pageReport" class="page">
   <div class="report-page">
-    <div style="font-size:13px; color:var(--text-hint); margin-bottom:16px;">← <a href="#" onclick="showPage('dashboard')" style="color:var(--brand);">Back to dashboard</a></div>
+    <div style="font-size:13px; color:var(--text-hint); margin-bottom:16px; display:flex; gap:16px;">
+      <a href="#" onclick="showPage('landing')" style="color:var(--brand);">← Home</a>
+      <a href="#" onclick="showPage('dashboard')" style="color:var(--brand);">Dashboard</a>
+    </div>
     <div class="report-title" id="reportTitle">Full Audit Report</div>
     <div class="report-sub" id="reportSub"></div>
 
@@ -927,6 +938,7 @@ let sbClient = null;
 let currentUser = null;
 let pendingAuditData = null;
 let authMode = 'signup';
+let isDemoMode = false;
 
 // Init Supabase — works as long as URL and key are non-empty
 if (SUPABASE_URL && SUPABASE_ANON_KEY) {
@@ -945,6 +957,10 @@ function showPage(name) {
   const map = { landing:'pageLanding', results:'pageResults', dashboard:'pageDashboard', report:'pageReport', admin:'pageAdmin', faq:'pageFaq' };
   document.getElementById(map[name]).classList.add('active');
   window.scrollTo(0,0);
+  if (name === 'landing') {
+    isDemoMode = false;
+    document.getElementById('demoBillPreview').style.display = 'none';
+  }
 }
 
 // ── CASCADING DROPDOWNS ───────────────────────────────────────
@@ -1038,27 +1054,37 @@ function onUtilitySelected(select) {
 
 // ── DEMO MODE ─────────────────────────────────────────────────
 function runDemo() {
+  isDemoMode = true;
   const demo = generateDemoBill();
 
-  // Convert canvas to blob and set as selected file
-  const canvas = document.createElement('canvas');
-  canvas.width = 816;
-  canvas.height = 1056;
-  const ctx = canvas.getContext('2d');
-  renderBillToCanvas(ctx, demo);
+  // Show bill preview immediately
+  const previewDiv = document.getElementById('demoBillPreview');
+  const previewCanvas = document.getElementById('demoBillCanvas');
+  previewCanvas.width = 816;
+  previewCanvas.height = 1056;
+  renderBillToCanvas(previewCanvas.getContext('2d'), demo);
+  previewDiv.style.display = 'block';
 
-  canvas.toBlob(blob => {
-    const file = new File([blob], `utility-bill-${demo.accountNumber}.png`, { type: 'image/png' });
+  // Scroll to upload card
+  setTimeout(() => document.getElementById('uploadCard').scrollIntoView({ behavior: 'smooth' }), 100);
+
+  // Generate file from canvas
+  const fullCanvas = document.createElement('canvas');
+  fullCanvas.width = 816;
+  fullCanvas.height = 1056;
+  renderBillToCanvas(fullCanvas.getContext('2d'), demo);
+
+  fullCanvas.toBlob(blob => {
+    const file = new File([blob], `demo-bill-${demo.accountNumber}.png`, { type: 'image/png' });
     selectedFile = file;
     document.getElementById('fileName').textContent = file.name;
     document.getElementById('fileSelected').classList.add('show');
 
-    // Pre-fill form fields
+    // Pre-fill form and advance to step 2
     goToStep2(true);
     document.getElementById('orgName').value = demo.facilityName;
     document.getElementById('facilityType').value = demo.facilityType;
 
-    // Set state dropdown
     const stateSelect = document.getElementById('stateSelect');
     for (let i = 0; i < stateSelect.options.length; i++) {
       if (stateSelect.options[i].text === demo.state) {
@@ -1068,13 +1094,12 @@ function runDemo() {
     }
     loadCounties(demo.state);
 
-    // Select utility type button
     document.querySelectorAll('.util-btn').forEach(b => b.classList.remove('selected'));
-    const utilBtn = document.querySelector(`.util-btn[onclick*="${demo.utilityType}"]`);
-    if (utilBtn) { utilBtn.classList.add('selected'); }
+    const utilBtn = document.querySelector(`.util-btn[onclick*="'${demo.utilityType}'"]`);
+    if (utilBtn) utilBtn.classList.add('selected');
     document.getElementById('utilityType').value = demo.utilityType;
 
-    showToast('Demo bill loaded — click Run free audit to continue');
+    showToast('Demo bill generated — click Run free audit to see results');
   }, 'image/png');
 }
 
@@ -1591,35 +1616,74 @@ function showResultsPage(result, org, facility, state, utility) {
 
   const list = document.getElementById('findingsList');
   list.innerHTML = '';
-  result.findings.forEach((f, i) => {
-    const locked = i >= 1;
-    list.innerHTML += `
-      <div class="finding-card">
-        <div class="finding-left">
-          <div class="finding-type">${f.type.replace(/_/g,' ')}</div>
-          <div class="finding-title ${locked?'finding-locked':''}">${locked ? f.title.split('').map(()=>'█').join('') : f.title}</div>
-          <div class="finding-desc ${locked?'finding-locked':''}">${locked ? 'Sign up to see this finding in detail and get the fix.' : f.description}</div>
-        </div>
-        <div class="finding-amount">
-          <div class="finding-savings ${locked?'finding-locked':''}">$${f.monthly_savings.toLocaleString()}</div>
-          <div class="finding-period">per month</div>
+
+  if (isDemoMode) {
+    // Demo: show ALL findings unlocked, no gate, full report
+    document.getElementById('resultsTitle').textContent = 'Demo audit complete — here\'s what we found';
+    document.getElementById('savingsNote').textContent = 'This is a demo using a generated sample bill. Sign up to audit your real bills.';
+    document.getElementById('gateBox').style.display = 'none';
+
+    result.findings.forEach(f => {
+      list.innerHTML += `
+        <div class="finding-card">
+          <div class="finding-left">
+            <div class="finding-type">${f.type.replace(/_/g,' ')}</div>
+            <div class="finding-title">${f.title}</div>
+            <div class="finding-desc">${f.description}</div>
+          </div>
+          <div class="finding-amount">
+            <div class="finding-savings">$${f.monthly_savings.toLocaleString()}</div>
+            <div class="finding-period">per month</div>
+          </div>
+        </div>`;
+    });
+
+    // Show full report section for demo
+    document.getElementById('demoFullReport').style.display = 'block';
+    document.getElementById('demoFullReport').innerHTML = `
+      <div style="margin-top:24px; padding:24px; background:var(--brand-light); border-radius:16px; border:1px solid rgba(15,110,86,0.2);">
+        <div style="font-size:16px; font-weight:700; color:var(--brand-dark); margin-bottom:8px;">This is a demo — ready to audit your real bills?</div>
+        <p style="font-size:14px; color:var(--brand-dark); opacity:0.8; margin-bottom:16px;">Your first real audit is free. No credit card required.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="showModal('signup')">Get started free →</button>
+          <button class="btn btn-ghost" onclick="runDemo()" style="background:white;">Run another demo</button>
         </div>
       </div>`;
-  });
+  } else {
+    // Real audit: show first finding, blur the rest, show gate
+    document.getElementById('resultsTitle').textContent = 'Audit complete — here\'s what we found';
+    document.getElementById('savingsNote').textContent = 'Based on identified billing errors and rate schedule misclassifications in this bill';
+    document.getElementById('gateBox').style.display = 'block';
+    document.getElementById('demoFullReport').style.display = 'none';
+
+    result.findings.forEach((f, i) => {
+      const locked = i >= 1;
+      list.innerHTML += `
+        <div class="finding-card">
+          <div class="finding-left">
+            <div class="finding-type">${f.type.replace(/_/g,' ')}</div>
+            <div class="finding-title ${locked?'finding-locked':''}">${locked ? f.title.split('').map(()=>'█').join('') : f.title}</div>
+            <div class="finding-desc ${locked?'finding-locked':''}">${locked ? 'Sign up to see this finding in detail and get the fix.' : f.description}</div>
+          </div>
+          <div class="finding-amount">
+            <div class="finding-savings ${locked?'finding-locked':''}">$${f.monthly_savings.toLocaleString()}</div>
+            <div class="finding-period">per month</div>
+          </div>
+        </div>`;
+    });
+
+    // Capture lead
+    if (sbClient) {
+      sbClient.from('leads').insert({
+        org_name: org, facility_type: facility, state,
+        utility_type: utility,
+        savings_shown: result.annual_savings_estimate || 0,
+        findings_count: (result.findings || []).length
+      }).then(({ error }) => { if (error) console.warn('Lead capture failed:', error); });
+    }
+  }
 
   showPage('results');
-
-  // Capture lead — anonymous user saw savings estimate but hasn't signed up
-  if (sbClient) {
-    sbClient.from('leads').insert({
-      org_name: org,
-      facility_type: facility,
-      state,
-      utility_type: utility,
-      savings_shown: result.annual_savings_estimate || 0,
-      findings_count: (result.findings || []).length
-    }).then(({ error }) => { if (error) console.warn('Lead capture failed:', error); });
-  }
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────
